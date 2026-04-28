@@ -1,0 +1,45 @@
+.civis-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.civis-input-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.civis-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  color: var(--os-text, #ecf0f1);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.civis-input:focus {
+  outline: none;
+  border-color: var(--os-primary, #3498db);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.civis-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.civis-input-error {
+  border-color: var(--os-urgent, #e74c3c);
+}
+
+.civis-input-error-text {
+  font-size: 0.75rem;
+  color: var(--os-urgent, #e74c3c);
+}
