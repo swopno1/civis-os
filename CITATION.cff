@@ -3,6 +3,7 @@ message: "If you use this software in humanitarian research or papers, please ci
 authors:
   - name: "ViveScript Solutions LLC"
     website: "https://www.vivescriptsolutions.com/"
+    email: "info@vivescriptsolutions.com"
   - family-names: "Hossain"
     given-names: "Md Amir"
     email: "amirhossain.limon@gmail.com"
