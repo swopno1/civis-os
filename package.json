@@ -1,0 +1,30 @@
+{
+  "name": "civisos",
+  "version": "0.1.0",
+  "description": "CivisOS - A Decentralized Resilience Operating System",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swopno1/civis-os.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swopno1/civis-os/issues"
+  },
+  "homepage": "https://github.com/swopno1/civis-os#readme",
+  "license": "AGPL-3.0",
+  "author": "CivisOS Contributors",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "^10.29.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.5",
+    "@types/node": "^24.12.2",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.10"
+  }
+}

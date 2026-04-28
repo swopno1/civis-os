@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software in humanitarian research or papers, please cite it as below."
+authors:
+  - name: "The CivisOS Contributors"
+title: "CivisOS: A Decentralized Resilience Operating System"
+version: 1.0.0
+date-released: 2026-04-28
+url: "https://github.com/CivisOS/civis-os"
+repository-code: "https://github.com/CivisOS/civis-os"
+abstract: >
+  CivisOS is a decentralized, offline-first "Resilience OS" designed to provide
+  essential coordination, communication, and survival tools when traditional
+  infrastructure fails. Built on a modular PWA and Rust/WASM architecture, it
+  operates across local mesh networks and LoRa, independent of nation-state or corporate control.
+license: AGPL-3.0-only
