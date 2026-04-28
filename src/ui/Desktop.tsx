@@ -2,14 +2,18 @@ import type { ComponentChildren } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { RNSIdentityManager } from '../mesh/Identity';
 import type { IRNSIdentity } from '../mesh/Identity';
+import { CivisStorage } from '../core/Storage';
 import './desktop.css';
 import { Window } from './components/Window';
+
 interface WindowState {
   id: string;
   title: string;
   isOpen: boolean;
   isMinimized: boolean;
   content: ComponentChildren;
+  x?: number;
+  y?: number;
 }
 
 export function Desktop() {
@@ -17,6 +21,27 @@ export function Desktop() {
   const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
+  const [isOfflineReady, setIsOfflineReady] = useState(false);
+
+  // Load window state from storage
+  useEffect(() => {
+    CivisStorage.get<WindowState[]>('desktop_windows').then(savedWindows => {
+      if (savedWindows) {
+        // We can't easily serialize Preact components, so we just restore the state
+        // and re-map the content based on ID if needed.
+        // For now, we'll just restore the metadata and let the user re-open if content is missing.
+        setWindows(savedWindows.map(w => ({ ...w, content: <div>Content lost on reload</div> })));
+      }
+    });
+  }, []);
+
+  // Save window state to storage when it changes
+  useEffect(() => {
+    const windowsToSave = windows.map(({ id, title, isOpen, isMinimized, x, y }) => ({
+      id, title, isOpen, isMinimized, x, y
+    }));
+    CivisStorage.set('desktop_windows', windowsToSave);
+  }, [windows]);
 
   // Initialize basic system stats and RNS Identity
   useEffect(() => {
@@ -37,8 +62,30 @@ export function Desktop() {
     // Attempt to register Service Worker for offline capabilities
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
-        .then(() => console.log('Service Worker Registered'))
+        .then(registration => {
+          console.log('Service Worker Registered');
+
+          // Check if it's already active and controlling the page
+          if (registration.active) {
+            setIsOfflineReady(true);
+          }
+
+          registration.addEventListener('updatefound', () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+              installingWorker.addEventListener('statechange', () => {
+                if (installingWorker.state === 'activated') {
+                  setIsOfflineReady(true);
+                }
+              });
+            }
+          });
+        })
         .catch(err => console.error('Service Worker Failed:', err));
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        setIsOfflineReady(true);
+      });
     }
   }, []);
 
@@ -46,9 +93,9 @@ export function Desktop() {
     setWindows(prev => {
       const existing = prev.find(w => w.id === id);
       if (existing) {
-        return prev.map(w => w.id === id ? { ...w, isMinimized: false, isOpen: true } : w);
+        return prev.map(w => w.id === id ? { ...w, isMinimized: false, isOpen: true, content } : w);
       }
-      return [...prev, { id, title, isOpen: true, isMinimized: false, content }];
+      return [...prev, { id, title, isOpen: true, isMinimized: false, content, x: 50, y: 50 }];
     });
   };
 
@@ -141,6 +188,9 @@ export function Desktop() {
 
         {/* System Tray */}
         <div className="system-tray">
+          <div className={`tray-item offline-readiness ${isOfflineReady ? 'ready' : 'syncing'}`} title={isOfflineReady ? 'Safe to disconnect: OS is fully cached offline' : 'Syncing: OS is caching for offline use'}>
+            {isOfflineReady ? '💾 ✅' : '💾 ⏳'}
+          </div>
           <div className="tray-item mesh-status" title="Network Status">
             {meshStatus === 'Offline' ? '📡 ❌' : '📡 ✅'}
           </div>
