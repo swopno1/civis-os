@@ -1,4 +1,5 @@
 import { ed25519 } from '@noble/curves/ed25519.js';
+import { Hex } from '../core/Hex.ts';
 
 /**
  * Reticulum Network Stack (RNS) Identity Manager
@@ -79,16 +80,10 @@ export class RNSIdentityManager {
   // --- Utility Functions ---
 
   private static bytesToHex(bytes: Uint8Array): string {
-    return Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    return Hex.encode(bytes);
   }
 
   private static hexToBytes(hex: string): Uint8Array {
-    const bytes = new Uint8Array(hex.length / 2);
-    for (let i = 0; i < hex.length; i += 2) {
-      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-    }
-    return bytes;
+    return Hex.decode(hex);
   }
 }
