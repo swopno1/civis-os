@@ -5,6 +5,7 @@ import type { IRNSIdentity } from '../mesh/Identity';
 import { CivisStorage } from '../core/Storage';
 import './desktop.css';
 import { Window } from './components/Window';
+import { Vault } from './modules/Vault';
 
 interface WindowState {
   id: string;
@@ -122,7 +123,7 @@ export function Desktop() {
           </button>
           <button 
             className="desktop-icon" 
-            onClick={() => openModule('vault', 'CivisVault', <div>Encrypted Storage Loading...</div>)}
+            onClick={() => openModule('vault', 'CivisVault', <Vault />)}
           >
             <div className="icon-placeholder">🔒</div>
             <span>CivisVault</span>
