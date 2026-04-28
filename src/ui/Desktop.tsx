@@ -1,4 +1,4 @@
-import { h, ComponentChildren } from 'preact';
+import type { ComponentChildren } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import './desktop.css';
 
@@ -12,7 +12,7 @@ interface WindowState {
 
 export function Desktop() {
   const [windows, setWindows] = useState<WindowState[]>([]);
-  const [meshStatus, setMeshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
+  const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
 
   // Initialize basic system stats
