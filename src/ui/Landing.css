@@ -51,6 +51,46 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+  text-align: left;
+}
+
+.pillar-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.pillar-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pillar-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.pillar-item h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--os-primary, #3498db);
+}
+
+.pillar-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .status-panel {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
@@ -111,7 +151,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
   margin-top: 3rem;
 }
 
@@ -121,19 +161,31 @@
   border-radius: 30px !important;
   text-transform: uppercase;
   letter-spacing: 1px;
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+}
+
+.repo-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .repo-link {
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   font-size: 0.95rem;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
   transition: color 0.2s;
 }
 
 .repo-link:hover {
   color: white;
-  border-bottom-style: solid;
+  text-decoration: underline;
+}
+
+.separator {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .landing-footer {

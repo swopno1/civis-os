@@ -19,9 +19,32 @@ export function Landing({ onBootOS }: LandingProps) {
 
         <section className="landing-content">
           <p className="mission-statement">
-            A decentralized "Digital Lifeboat" designed to function when traditional infrastructure fails. 
-            Organize, communicate, and survive during severe crises—independent of corporate or nation-state control.
+            CivisOS is a decentralized "Digital Lifeboat" designed to function when traditional infrastructure fails.
+            In an era of unprecedented global uncertainty, we provide the tools to organize, communicate, and survive during severe crises—independent of corporate or nation-state control.
           </p>
+
+          <div className="pillars-grid">
+            <div className="pillar-item">
+              <span className="pillar-icon">🛡️</span>
+              <h3>Neutrality</h3>
+              <p>Politically neutral and independent of nation-state or corporate control.</p>
+            </div>
+            <div className="pillar-item">
+              <span className="pillar-icon">📡</span>
+              <h3>Offline-First</h3>
+              <p>Built to function fully offline, syncing via local mesh networks.</p>
+            </div>
+            <div className="pillar-item">
+              <span className="pillar-icon">💻</span>
+              <h3>Agnostic</h3>
+              <p>Runs on smartphones, old laptops, Raspberry Pis, and IoT devices.</p>
+            </div>
+            <div className="pillar-item">
+              <span className="pillar-icon">🔍</span>
+              <h3>Verifiable</h3>
+              <p>Fully open-source and transparent to ensure complete global trust.</p>
+            </div>
+          </div>
 
           <div className="status-panel">
             <h3>System Status</h3>
@@ -40,9 +63,19 @@ export function Landing({ onBootOS }: LandingProps) {
             <Button size="large" onClick={onBootOS} className="boot-btn">
               Boot CivisOS Desktop
             </Button>
-            <a href="https://github.com/swopno1/civis-os" target="_blank" rel="noreferrer" className="repo-link">
-              View Source Code & Verification
-            </a>
+            <div className="repo-links">
+              <a href="https://github.com/swopno1/civis-os" target="_blank" rel="noreferrer" className="repo-link">
+                GitHub Repository
+              </a>
+              <span className="separator">•</span>
+              <a href="https://github.com/swopno1/civis-os/blob/main/README.md" target="_blank" rel="noreferrer" className="repo-link">
+                Documentation
+              </a>
+              <span className="separator">•</span>
+              <a href="https://github.com/swopno1/civis-os/blob/main/.github/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="repo-link">
+                Contributing
+              </a>
+            </div>
           </div>
         </section>
 

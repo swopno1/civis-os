@@ -5,10 +5,20 @@ import { Desktop } from './ui/Desktop'
 import './ui/desktop.css'
 
 function App() {
-  const [route, setRoute] = useState(window.location.hash || '#landing')
+  const [route, setRoute] = useState(() => {
+    const hash = window.location.hash;
+    return (hash === '#os' || hash === '#landing') ? hash : '#landing';
+  })
 
   useEffect(() => {
-    const handleHashChange = () => setRoute(window.location.hash || '#landing')
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash && hash !== '#os' && hash !== '#landing') {
+        window.location.hash = '#landing';
+      } else {
+        setRoute(hash || '#landing');
+      }
+    };
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
