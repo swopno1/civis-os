@@ -1,0 +1,151 @@
+.civis-landing {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, var(--os-bg-accent, #2c3e50) 0%, var(--os-bg, #1e1e1e) 100%);
+  color: var(--os-text, #ecf0f1);
+  padding: 2rem;
+}
+
+.landing-container {
+  max-width: 800px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 3rem;
+  backdrop-filter: blur(20px);
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landing-header .logo-placeholder {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.landing-header h1 {
+  font-size: 3.5rem;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.landing-header h2 {
+  font-size: 1.5rem;
+  color: var(--os-primary, #3498db);
+  margin-top: 0.5rem;
+  font-weight: 400;
+}
+
+.mission-statement {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 2rem 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.status-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.status-panel h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.status-indicator.ready {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.status-indicator.pending {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-indicator.pending .dot {
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.status-detail {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.action-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.boot-btn {
+  font-size: 1.25rem !important;
+  padding: 1rem 2.5rem !important;
+  border-radius: 30px !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.repo-link {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.4);
+  transition: color 0.2s;
+}
+
+.repo-link:hover {
+  color: white;
+  border-bottom-style: solid;
+}
+
+.landing-footer {
+  margin-top: 4rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.landing-footer p {
+  margin: 0.25rem 0;
+}
+
+.license-info {
+  font-weight: 600;
+}

@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import './desktop.css';
-
+import { Window } from './components/Window';
 interface WindowState {
   id: string;
   title: string;
@@ -98,18 +98,17 @@ export function Desktop() {
 
         {/* Window Manager */}
         {windows.map(win => win.isOpen && !win.isMinimized && (
-          <div key={win.id} className="os-window">
-            <div className="window-header">
-              <span className="window-title">{win.title}</span>
-              <div className="window-controls">
-                <button onClick={() => toggleMinimize(win.id)}>_</button>
-                <button onClick={() => closeWindow(win.id)}>X</button>
-              </div>
-            </div>
-            <div className="window-body">
-              {win.content}
-            </div>
-          </div>
+          <Window
+            key={win.id}
+            id={win.id}
+            title={win.title}
+            isActive={true}
+            onMinimize={toggleMinimize}
+            onClose={closeWindow}
+            onFocus={() => {}}
+          >
+            {win.content}
+          </Window>
         ))}
       </main>
 
