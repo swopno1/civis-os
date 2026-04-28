@@ -23,6 +23,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@noble/curves": "^2.2.0",
     "preact": "^10.29.1"
   },
   "devDependencies": {

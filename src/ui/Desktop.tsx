@@ -1,5 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
+import { RNSIdentityManager } from '../mesh/Identity';
+import type { IRNSIdentity } from '../mesh/Identity';
 import './desktop.css';
 import { Window } from './components/Window';
 interface WindowState {
@@ -14,9 +16,14 @@ export function Desktop() {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
+  const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
 
-  // Initialize basic system stats
+  // Initialize basic system stats and RNS Identity
   useEffect(() => {
+    // Generate or load the local sovereign Reticulum identity
+    RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
+      setRnsIdentity(identity);
+    });
     // Mock battery API integration
     if ('getBattery' in navigator) {
       (navigator as any).getBattery().then((battery: any) => {
@@ -115,7 +122,9 @@ export function Desktop() {
       {/* Taskbar */}
       <footer className="taskbar">
         <div className="start-menu">
-          <button className="start-btn">⊞ CivisOS</button>
+          <button className="start-btn" title={rnsIdentity ? `RNS Address: ${rnsIdentity.addressHash}` : 'Loading Identity...'}>
+            ⊞ {rnsIdentity ? `CivisOS [${rnsIdentity.addressHash.substring(0, 6)}]` : 'CivisOS'}
+          </button>
         </div>
         
         <div className="open-apps">
