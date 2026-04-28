@@ -51,9 +51,19 @@ export interface ICivisModule {
   mount: (container: HTMLElement) => void;
 
   /**
-   * Called to unmount the UI and pause background tasks
+   * Called to unmount the UI (e.g., when window is closed but module stays in memory)
    */
   unmount: () => void;
+
+  /**
+   * Called to pause background tasks (e.g., when OS enters low power mode or module is deactivated)
+   */
+  suspend: () => Promise<void>;
+
+  /**
+   * Called to resume background tasks from suspended state
+   */
+  resume: () => Promise<void>;
   
   /**
    * Called before removing the module completely from the OS
