@@ -1,19 +1,21 @@
-import type { ComponentChildren } from 'preact';
-import { useState, useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { RNSIdentityManager } from '../mesh/Identity';
 import type { IRNSIdentity } from '../mesh/Identity';
 import './desktop.css';
-import { Window } from './components/Window';
-interface WindowState {
-  id: string;
-  title: string;
-  isOpen: boolean;
-  isMinimized: boolean;
-  content: ComponentChildren;
-}
+import { WindowManager } from './components/WindowManager';
+import { useWindowManager, type WindowState } from './hooks/useWindowManager.ts';
 
 export function Desktop() {
-  const [windows, setWindows] = useState<WindowState[]>([]);
+  const {
+    windows,
+    openWindow,
+    closeWindow,
+    toggleMinimize,
+    toggleMaximize,
+    focusWindow,
+    updateWindowPosition
+  } = useWindowManager();
+
   const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
@@ -42,24 +44,6 @@ export function Desktop() {
     }
   }, []);
 
-  const openModule = (id: string, title: string, content: ComponentChildren) => {
-    setWindows(prev => {
-      const existing = prev.find(w => w.id === id);
-      if (existing) {
-        return prev.map(w => w.id === id ? { ...w, isMinimized: false, isOpen: true } : w);
-      }
-      return [...prev, { id, title, isOpen: true, isMinimized: false, content }];
-    });
-  };
-
-  const closeWindow = (id: string) => {
-    setWindows(prev => prev.filter(w => w.id !== id));
-  };
-
-  const toggleMinimize = (id: string) => {
-    setWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: !w.isMinimized } : w));
-  };
-
   return (
     <div className="desktop-environment">
       {/* Workspace Area */}
@@ -68,55 +52,50 @@ export function Desktop() {
         <div className="desktop-icons">
           <button 
             className="desktop-icon" 
-            onClick={() => openModule('meshchat', 'MeshChat', <div>Secure P2P Messenger Loading...</div>)}
+            onClick={() => openWindow('meshchat', 'MeshChat', <div>Secure P2P Messenger Loading...</div>)}
           >
             <div className="icon-placeholder">💬</div>
             <span>MeshChat</span>
           </button>
           <button 
             className="desktop-icon" 
-            onClick={() => openModule('vault', 'CivisVault', <div>Encrypted Storage Loading...</div>)}
+            onClick={() => openWindow('vault', 'CivisVault', <div>Encrypted Storage Loading...</div>)}
           >
             <div className="icon-placeholder">🔒</div>
             <span>CivisVault</span>
           </button>
           <button 
             className="desktop-icon" 
-            onClick={() => openModule('board', 'LocalBoard', <div>Decentralized Bulletin Board Loading...</div>)}
+            onClick={() => openWindow('board', 'LocalBoard', <div>Decentralized Bulletin Board Loading...</div>)}
           >
             <div className="icon-placeholder">📋</div>
             <span>LocalBoard</span>
           </button>
           <button 
             className="desktop-icon" 
-            onClick={() => openModule('sense', 'Sense', <div>Environmental Data Loading...</div>)}
+            onClick={() => openWindow('sense', 'Sense', <div>Environmental Data Loading...</div>)}
           >
             <div className="icon-placeholder">🌡️</div>
             <span>Sense</span>
           </button>
           <button 
             className="desktop-icon urgent-icon" 
-            onClick={() => openModule('sos', 'SOS Beacon', <div>Emergency Broadcast System...</div>)}
+            onClick={() => openWindow('sos', 'SOS Beacon', <div>Emergency Broadcast System...</div>)}
           >
             <div className="icon-placeholder">🚨</div>
             <span>SOS Beacon</span>
           </button>
         </div>
 
-        {/* Window Manager */}
-        {windows.map(win => win.isOpen && !win.isMinimized && (
-          <Window
-            key={win.id}
-            id={win.id}
-            title={win.title}
-            isActive={true}
-            onMinimize={toggleMinimize}
-            onClose={closeWindow}
-            onFocus={() => {}}
-          >
-            {win.content}
-          </Window>
-        ))}
+        {/* Window Manager Component */}
+        <WindowManager
+          windows={windows}
+          onClose={closeWindow}
+          onMinimize={toggleMinimize}
+          onMaximize={toggleMaximize}
+          onFocus={focusWindow}
+          onMove={updateWindowPosition}
+        />
       </main>
 
       {/* Taskbar */}
@@ -128,11 +107,18 @@ export function Desktop() {
         </div>
         
         <div className="open-apps">
-          {windows.filter(w => w.isOpen).map(win => (
+          {windows.filter((w: WindowState) => w.isOpen).map((win: WindowState) => (
             <button 
               key={win.id} 
               className={`taskbar-app ${!win.isMinimized ? 'active' : ''}`}
-              onClick={() => toggleMinimize(win.id)}
+              onClick={() => {
+                if (win.isMinimized) {
+                  toggleMinimize(win.id);
+                  focusWindow(win.id);
+                } else {
+                  toggleMinimize(win.id);
+                }
+              }}
             >
               {win.title}
             </button>

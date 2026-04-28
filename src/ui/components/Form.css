@@ -1,0 +1,25 @@
+.civis-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.civis-form-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.1rem;
+  color: var(--os-text, #ecf0f1);
+  border-bottom: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  padding-bottom: 0.5rem;
+}
+
+.civis-form-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.civis-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
