@@ -1,15 +1,19 @@
 import type { ComponentChildren } from 'preact';
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { RNSIdentityManager } from '../mesh/Identity';
 import type { IRNSIdentity } from '../mesh/Identity';
 import './desktop.css';
 import { Window } from './components/Window';
+import { moduleManager } from '../core/ModuleManager';
+import { HelloWorldModule } from '../modules/HelloWorldModule';
+
 interface WindowState {
   id: string;
   title: string;
   isOpen: boolean;
   isMinimized: boolean;
-  content: ComponentChildren;
+  content?: ComponentChildren;
+  isModule?: boolean;
 }
 
 export function Desktop() {
@@ -17,6 +21,7 @@ export function Desktop() {
   const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
+  const moduleContainers = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Initialize basic system stats and RNS Identity
   useEffect(() => {
@@ -24,6 +29,17 @@ export function Desktop() {
     RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
       setRnsIdentity(identity);
     });
+
+    // Initialize ModuleManager and register HelloWorldModule
+    const initModules = async () => {
+      try {
+        await moduleManager.registerModule(new HelloWorldModule());
+      } catch (e) {
+        console.warn('Module registration error (likely already registered):', e);
+      }
+    };
+    initModules();
+
     // Mock battery API integration
     if ('getBattery' in navigator) {
       (navigator as any).getBattery().then((battery: any) => {
@@ -42,22 +58,56 @@ export function Desktop() {
     }
   }, []);
 
-  const openModule = (id: string, title: string, content: ComponentChildren) => {
+  const openModule = (id: string, title: string, content: ComponentChildren, isModule: boolean = false) => {
     setWindows(prev => {
       const existing = prev.find(w => w.id === id);
       if (existing) {
+        if (existing.isMinimized) {
+          if (isModule) moduleManager.resumeModule(id);
+        }
         return prev.map(w => w.id === id ? { ...w, isMinimized: false, isOpen: true } : w);
       }
-      return [...prev, { id, title, isOpen: true, isMinimized: false, content }];
+      return [...prev, { id, title, isOpen: true, isMinimized: false, content, isModule }];
     });
   };
 
   const closeWindow = (id: string) => {
+    const win = windows.find(w => w.id === id);
+    if (win?.isModule) {
+      moduleManager.unmountModule(id);
+      moduleContainers.current.delete(id);
+    }
     setWindows(prev => prev.filter(w => w.id !== id));
   };
 
   const toggleMinimize = (id: string) => {
-    setWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: !w.isMinimized } : w));
+    setWindows(prev => prev.map(w => {
+      if (w.id === id) {
+        const nextMinimized = !w.isMinimized;
+        if (w.isModule) {
+          if (nextMinimized) {
+            moduleManager.suspendModule(id);
+          } else {
+            moduleManager.resumeModule(id);
+          }
+        }
+        return { ...w, isMinimized: nextMinimized };
+      }
+      return w;
+    }));
+  };
+
+  const handleModuleMount = (id: string, el: HTMLDivElement | null) => {
+    if (el) {
+      // Re-mount if the element is different or not yet registered
+      if (moduleContainers.current.get(id) !== el) {
+        moduleContainers.current.set(id, el);
+        moduleManager.mountModule(id, el);
+      }
+    } else {
+      // Element is unmounting
+      moduleContainers.current.delete(id);
+    }
   };
 
   return (
@@ -66,6 +116,13 @@ export function Desktop() {
       <main className="workspace">
         {/* Desktop Icons */}
         <div className="desktop-icons">
+          <button
+            className="desktop-icon"
+            onClick={() => openModule('org.civisos.helloworld', 'Hello World', null, true)}
+          >
+            <div className="icon-placeholder">👋</div>
+            <span>Hello World</span>
+          </button>
           <button 
             className="desktop-icon" 
             onClick={() => openModule('meshchat', 'MeshChat', <div>Secure P2P Messenger Loading...</div>)}
@@ -114,7 +171,11 @@ export function Desktop() {
             onClose={closeWindow}
             onFocus={() => {}}
           >
-            {win.content}
+            {win.isModule ? (
+              <div ref={(el) => handleModuleMount(win.id, el)} className="module-container" />
+            ) : (
+              win.content
+            )}
           </Window>
         ))}
       </main>
