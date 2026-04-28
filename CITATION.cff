@@ -5,8 +5,8 @@ authors:
 title: "CivisOS: A Decentralized Resilience Operating System"
 version: 1.0.0
 date-released: 2026-04-28
-url: "https://github.com/CivisOS/civis-os"
-repository-code: "https://github.com/CivisOS/civis-os"
+url: "https://github.com/swopno1/civis-os"
+repository-code: "https://github.com/swopno1/civis-os"
 abstract: >
   CivisOS is a decentralized, offline-first "Resilience OS" designed to provide
   essential coordination, communication, and survival tools when traditional

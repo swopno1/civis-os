@@ -47,7 +47,7 @@ CivisOS isn't just for doomsday; it's useful right now.
 ### For Developers
 
 1. **Prerequisites**: Node.js, pnpm, Rust toolchain.
-2. **Clone the Repo**: `git clone https://github.com/CivisOS/civis-os.git`
+2. **Clone the Repo**: `git clone https://github.com/swopno1/civis-os.git`
 3. **Install Dependencies**: `pnpm install`
 4. **Start Development**: `pnpm run dev`
 
