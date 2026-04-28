@@ -63,3 +63,12 @@
   background-color: #c0392b;
   box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
 }
+
+.civis-btn-ghost {
+  background-color: transparent;
+  color: var(--os-text, #ecf0f1);
+  box-shadow: none;
+}
+.civis-btn-ghost:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
