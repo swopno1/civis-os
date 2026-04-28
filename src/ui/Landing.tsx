@@ -50,8 +50,8 @@ export function Landing({ onBootOS }: LandingProps) {
             <h3>System Status</h3>
             <div className={`status-indicator ${isOfflineReady ? 'ready' : 'pending'}`}>
               <span className="dot"></span>
-              {isOfflineReady 
-                ? "Offline Core Cached & Ready" 
+              {isOfflineReady
+                ? "Offline Core Cached & Ready"
                 : "Caching Offline Core..."}
             </div>
             <p className="status-detail">
@@ -64,15 +64,15 @@ export function Landing({ onBootOS }: LandingProps) {
               Boot CivisOS Desktop
             </Button>
             <div className="repo-links">
-              <a href="https://github.com/swopno1/civis-os" target="_blank" rel="noreferrer" className="repo-link">
+              <a href="https://github.com/swopno1/civis-os" target="_blank" rel="noopener noreferrer" className="repo-link">
                 GitHub Repository
               </a>
               <span className="separator">•</span>
-              <a href="https://github.com/swopno1/civis-os/blob/main/README.md" target="_blank" rel="noreferrer" className="repo-link">
+              <a href="https://github.com/swopno1/civis-os/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="repo-link">
                 Documentation
               </a>
               <span className="separator">•</span>
-              <a href="https://github.com/swopno1/civis-os/blob/main/.github/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="repo-link">
+              <a href="https://github.com/swopno1/civis-os/blob/main/.github/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="repo-link">
                 Contributing
               </a>
             </div>
