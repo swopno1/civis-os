@@ -11,22 +11,29 @@ export interface WindowState {
   position: { x: number; y: number };
   size: { width: number; height: number };
   content: ComponentChildren;
+  isModule?: boolean;
 }
 
 export function useWindowManager() {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [maxZIndex, setMaxZIndex] = useState(10);
 
-  const openWindow = useCallback((id: string, title: string, content: ComponentChildren) => {
+  const openWindow = useCallback((id: string, title: string, content: ComponentChildren, isModule: boolean = false) => {
     setWindows(prev => {
       const existing = prev.find(w => w.id === id);
-      if (existing) {
-        const newZ = maxZIndex + 1;
-        setMaxZIndex(newZ);
-        return prev.map(w => w.id === id ? { ...w, isMinimized: false, isOpen: true, zIndex: newZ } : w);
-      }
       const newZ = maxZIndex + 1;
       setMaxZIndex(newZ);
+
+      if (existing) {
+        return prev.map(w => w.id === id ? {
+          ...w,
+          isMinimized: false,
+          isOpen: true,
+          zIndex: newZ,
+          content
+        } : w);
+      }
+
       const newWindow: WindowState = {
         id,
         title,
@@ -37,6 +44,7 @@ export function useWindowManager() {
         position: { x: 100 + (prev.length * 30), y: 100 + (prev.length * 30) },
         size: { width: 600, height: 400 },
         content,
+        isModule,
       };
       return [...prev, newWindow];
     });
@@ -57,7 +65,7 @@ export function useWindowManager() {
   const focusWindow = useCallback((id: string) => {
     setWindows(prev => {
       const win = prev.find(w => w.id === id);
-      if (!win || win.zIndex === maxZIndex) return prev;
+      if (!win || (win.zIndex === maxZIndex && !win.isMinimized)) return prev;
 
       const newZ = maxZIndex + 1;
       setMaxZIndex(newZ);
@@ -69,8 +77,16 @@ export function useWindowManager() {
     setWindows(prev => prev.map(w => w.id === id ? { ...w, position: { x, y } } : w));
   }, []);
 
+  const hydrateWindows = useCallback((savedWindows: WindowState[]) => {
+    setWindows(savedWindows);
+    const maxZ = savedWindows.reduce((max, w) => Math.max(max, w.zIndex), 10);
+    setMaxZIndex(maxZ);
+  }, []);
+
   return {
     windows,
+    setWindows,
+    hydrateWindows,
     openWindow,
     closeWindow,
     toggleMinimize,

@@ -100,7 +100,7 @@ export function Window({
         </div>
       </div>
       <div className="civis-window-body">
-        {children}
+        {children || <div className="module-loading">Loading module content...</div>}
       </div>
     </div>
   );
