@@ -11,7 +11,11 @@
   },
   "homepage": "https://github.com/swopno1/civis-os#readme",
   "license": "AGPL-3.0",
-  "author": "CivisOS Contributors",
+  "author": {
+    "name": "ViveScript Solutions LLC",
+    "email": "amirhossain.limon@gmail.com",
+    "url": "https://www.vivescriptsolutions.com/"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,6 +1,8 @@
 # CivisOS: The Resilience Operating System
 
 > **A "Digital Lifeboat" for Global Survival Scenarios**
+> 
+> *Proudly developed and maintained by **[ViveScript Solutions LLC](https://www.vivescriptsolutions.com/)** and **Md Amir Hossain** ([amirhossain.limon@gmail.com](mailto:amirhossain.limon@gmail.com)).*
 
 In an era of unprecedented global uncertainty, humanity needs a resilient, unkillable network infrastructure. CivisOS is a decentralized "Resilience OS" designed to function when traditional infrastructure fails. We provide the tools to organize, communicate, and survive during severe crises, whether natural, political, or economic.
 

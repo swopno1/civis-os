@@ -1,7 +1,11 @@
 cff-version: 1.2.0
 message: "If you use this software in humanitarian research or papers, please cite it as below."
 authors:
-  - name: "The CivisOS Contributors"
+  - name: "ViveScript Solutions LLC"
+    website: "https://www.vivescriptsolutions.com/"
+  - family-names: "Hossain"
+    given-names: "Md Amir"
+    email: "amirhossain.limon@gmail.com"
 title: "CivisOS: A Decentralized Resilience Operating System"
 version: 1.0.0
 date-released: 2026-04-28
