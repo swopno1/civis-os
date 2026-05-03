@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@noble/curves": "^2.2.0",
+    "@playwright/test": "^1.59.1",
     "preact": "^10.29.1",
     "tweetnacl": "^1.0.3"
   },

@@ -21,6 +21,12 @@ const cryptoMock = {
       // Mock SHA-256 by returning a fixed buffer
       return new Uint8Array(32).fill(3).buffer;
     }
+  },
+  getRandomValues: (array: Uint8Array) => {
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 256);
+    }
+    return array;
   }
 };
 

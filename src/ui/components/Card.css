@@ -1,0 +1,49 @@
+.civis-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  color: var(--os-text, #ecf0f1);
+}
+
+.civis-card.clickable {
+  cursor: pointer;
+}
+
+.civis-card.clickable:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.civis-card-header {
+  padding: 1.25rem 1.5rem;
+  border-block-end: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+}
+
+.civis-card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.civis-card-subtitle {
+  margin-block-start: 0.25rem;
+  margin-block-end: 0;
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.civis-card-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.civis-card-footer {
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-block-start: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+}

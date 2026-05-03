@@ -7,6 +7,7 @@ import { WindowManager } from './components/WindowManager';
 import { useWindowManager } from './hooks/useWindowManager.ts';
 import { moduleManager } from '../core/ModuleManager';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
+import { Button } from './components/Button';
 
 export function Desktop() {
   const {
@@ -20,11 +21,26 @@ export function Desktop() {
     updateWindowPosition
   } = useWindowManager();
 
-  const [meshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
+  const [meshStatus, setMeshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
   const moduleContainers = useRef<Map<string, HTMLDivElement>>(new Map());
   const [isOfflineReady, setIsOfflineReady] = useState(false);
+  const [highContrast, setHighContrast] = useState<boolean | null>(null);
+
+  // Load high contrast preference
+  useEffect(() => {
+    CivisStorage.get<boolean>('high_contrast').then(pref => {
+      setHighContrast(pref ?? false);
+    });
+  }, []);
+
+  // Save high contrast preference
+  useEffect(() => {
+    if (highContrast !== null) {
+      CivisStorage.set('high_contrast', highContrast);
+    }
+  }, [highContrast]);
 
   // Load window state from storage
   useEffect(() => {
@@ -147,51 +163,57 @@ export function Desktop() {
   };
 
   return (
-    <div className="desktop-environment">
+    <div className={`desktop-environment ${highContrast === true ? 'high-contrast' : ''}`}>
       <main className="workspace">
         <div className="desktop-icons">
-          <button
+          <Button
+            variant="icon"
             className="desktop-icon"
             onClick={() => openModuleWindow('org.civisos.helloworld', 'Hello World')}
           >
             <div className="icon-placeholder">👋</div>
             <span>Hello World</span>
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="icon"
             className="desktop-icon" 
             onClick={() => openWindow('meshchat', 'MeshChat', <div>Secure P2P Messenger Loading...</div>)}
           >
             <div className="icon-placeholder">💬</div>
             <span>MeshChat</span>
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="icon"
             className="desktop-icon" 
             onClick={() => openWindow('vault', 'CivisVault', <div>Encrypted Storage Loading...</div>)}
           >
             <div className="icon-placeholder">🔒</div>
             <span>CivisVault</span>
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="icon"
             className="desktop-icon" 
             onClick={() => openWindow('board', 'LocalBoard', <div>Decentralized Bulletin Board Loading...</div>)}
           >
             <div className="icon-placeholder">📋</div>
             <span>LocalBoard</span>
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="icon"
             className="desktop-icon" 
             onClick={() => openWindow('sense', 'Sense', <div>Environmental Data Loading...</div>)}
           >
             <div className="icon-placeholder">🌡️</div>
             <span>Sense</span>
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="icon"
             className="desktop-icon urgent-icon" 
             onClick={() => openWindow('sos', 'SOS Beacon', <div>Emergency Broadcast System...</div>)}
           >
             <div className="icon-placeholder">🚨</div>
             <span>SOS Beacon</span>
-          </button>
+          </Button>
         </div>
 
         <WindowManager
@@ -206,15 +228,20 @@ export function Desktop() {
 
       <footer className="taskbar">
         <div className="start-menu">
-          <button className="start-btn" title={rnsIdentity ? `RNS Address: ${rnsIdentity.addressHash}` : 'Loading Identity...'}>
+          <Button
+            variant="primary"
+            className="start-btn"
+            title={rnsIdentity ? `RNS Address: ${rnsIdentity.addressHash}` : 'Loading Identity...'}
+          >
             ⊞ {rnsIdentity ? `CivisOS [${rnsIdentity.addressHash.substring(0, 6)}]` : 'CivisOS'}
-          </button>
+          </Button>
         </div>
         
         <div className="open-apps">
           {windows.filter(w => w.isOpen).map(win => (
-            <button 
+            <Button
               key={win.id} 
+              variant="secondary"
               className={`taskbar-app ${!win.isMinimized ? 'active' : ''}`}
               onClick={() => {
                 if (win.isMinimized) {
@@ -225,16 +252,39 @@ export function Desktop() {
               }}
             >
               {win.title}
-            </button>
+            </Button>
           ))}
         </div>
 
         <div className="system-tray">
+          <Button
+            variant="icon"
+            className="tray-item toggle-hc"
+            onClick={() => setHighContrast(!highContrast)}
+            title="Toggle High Contrast Mode"
+            style={{ fontSize: '1rem' }}
+          >
+            {highContrast ? '👁️‍🗨️' : '👁️'}
+          </Button>
           <div className={`tray-item offline-readiness ${isOfflineReady ? 'ready' : 'syncing'}`} title={isOfflineReady ? 'Safe to disconnect: OS is fully cached offline' : 'Syncing: OS is caching for offline use'}>
             {isOfflineReady ? '💾 ✅' : '💾 ⏳'}
           </div>
-          <div className="tray-item mesh-status" title="Network Status">
-            {meshStatus === 'Offline' ? '📡 ❌' : '📡 ✅'}
+          <div
+            className={`tray-item mesh-status ${meshStatus.toLowerCase().replace(' ', '-')}`}
+            title={`Mesh Status: ${meshStatus}`}
+            onClick={() => {
+              // Cycle through statuses for demo/dev purposes if desired,
+              // but normally this would be driven by the mesh manager.
+              const statuses: ('Offline' | 'Local Mesh' | 'Global')[] = ['Offline', 'Local Mesh', 'Global'];
+              const next = statuses[(statuses.indexOf(meshStatus) + 1) % statuses.length];
+              setMeshStatus(next);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            {meshStatus === 'Offline' && '📡 ❌'}
+            {meshStatus === 'Local Mesh' && '📡 🌐'}
+            {meshStatus === 'Global' && '📡 🌍'}
+            <span style={{ marginInlineStart: '0.25rem' }}>{meshStatus}</span>
           </div>
           <div className="tray-item local-storage" title="Encrypted Storage Mounted">
             💽
