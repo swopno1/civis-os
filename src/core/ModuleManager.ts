@@ -1,12 +1,20 @@
 import type { ICivisModule, ICivisModuleContext, CivisPermission } from './ICivisModule';
+import { CivisStorage } from './Storage';
+
+export type PermissionHandler = (moduleId: string, permission: CivisPermission) => Promise<boolean>;
 
 export class ModuleManager {
   private modules: Map<string, ICivisModule> = new Map();
   private contexts: Map<string, ICivisModuleContext> = new Map();
   private grantedPermissions: Map<string, Set<CivisPermission>> = new Map();
+  private permissionHandler: PermissionHandler | null = null;
 
   constructor() {
     console.log('ModuleManager initialized');
+  }
+
+  public setPermissionHandler(handler: PermissionHandler): void {
+    this.permissionHandler = handler;
   }
 
   public async registerModule(module: ICivisModule): Promise<void> {
@@ -28,15 +36,26 @@ export class ModuleManager {
   private createModuleContext(moduleId: string): ICivisModuleContext {
     return {
       requestPermission: async (permission: CivisPermission): Promise<boolean> => {
-        // In a real OS, this would trigger a UI prompt.
-        // For now, we auto-grant if it's in the module's requested permissions.
-        const module = this.modules.get(moduleId);
-        if (module && module.permissions.includes(permission)) {
-          this.grantedPermissions.get(moduleId)?.add(permission);
-          console.log(`Permission ${permission} granted to module ${moduleId}`);
+        if (this.grantedPermissions.get(moduleId)?.has(permission)) {
           return true;
         }
-        console.warn(`Permission ${permission} denied to module ${moduleId}`);
+
+        const module = this.modules.get(moduleId);
+        if (!module || !module.permissions.includes(permission)) {
+          console.warn(`Permission ${permission} denied: Not requested by module ${moduleId}`);
+          return false;
+        }
+
+        if (this.permissionHandler) {
+          const granted = await this.permissionHandler(moduleId, permission);
+          if (granted) {
+            this.grantedPermissions.get(moduleId)?.add(permission);
+          }
+          return granted;
+        }
+
+        // Fallback if no handler is set (should not happen in production)
+        console.warn(`No permission handler set. Denying ${permission} for ${moduleId}`);
         return false;
       },
       getStorageInstance: async (namespace: string): Promise<any> => {
@@ -47,17 +66,23 @@ export class ModuleManager {
         if (!hasRead && !hasWrite) {
           throw new Error(`Module ${moduleId} does not have storage permissions.`);
         }
-        // Return a mock storage instance with granular permission checks
+
+        const getFullKey = (key: string) => `mod:${moduleId}:${namespace}:${key}`;
+
         return {
           dbName: namespace,
           get: async (key: string) => {
             if (!hasRead) throw new Error(`Permission storage:read denied for module ${moduleId}`);
-            console.log(`[${moduleId}] Reading ${key} from ${namespace}`);
+            return await CivisStorage.get(getFullKey(key));
           },
           put: async (key: string, val: any) => {
             if (!hasWrite) throw new Error(`Permission storage:write denied for module ${moduleId}`);
-            console.log(`[${moduleId}] Writing ${key} to ${namespace}`, val);
+            await CivisStorage.set(getFullKey(key), val);
           },
+          delete: async (key: string) => {
+            if (!hasWrite) throw new Error(`Permission storage:write denied for module ${moduleId}`);
+            await CivisStorage.delete(getFullKey(key));
+          }
         };
       },
       getMeshClient: () => {

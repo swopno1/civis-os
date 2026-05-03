@@ -5,6 +5,7 @@ interface ButtonProps {
   children: ComponentChildren;
   onClick?: (e: MouseEvent) => void;
   variant?: 'primary' | 'secondary' | 'danger' | 'icon';
+  size?: 'small' | 'medium' | 'large';
   className?: string;
   title?: string;
   disabled?: boolean;
@@ -16,6 +17,7 @@ export function Button({
   children, 
   onClick,
   variant = 'secondary',
+  size = 'medium',
   className = '', 
   title,
   disabled = false,
@@ -25,7 +27,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`civis-button civis-button--${variant} ${className}`}
+      className={`civis-button civis-button--${variant} civis-button--${size} ${className}`}
       onClick={onClick}
       title={title}
       disabled={disabled}

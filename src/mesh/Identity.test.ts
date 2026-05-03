@@ -17,7 +17,7 @@ Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, wri
 // Mock crypto.subtle
 const cryptoMock = {
   subtle: {
-    digest: async (algorithm: string, data: Uint8Array) => {
+    digest: async (_algorithm: string, _data: Uint8Array) => {
       // Mock SHA-256 by returning a fixed buffer
       return new Uint8Array(32).fill(3).buffer;
     }
@@ -49,7 +49,7 @@ describe('RNSIdentityManager', () => {
     assert.strictEqual(identity.addressHash.length, 32); // 16 bytes hex encoded
 
     const stored = localStorage.getItem('civisos_rns_identity');
-    assert.ok(stored);
+    assert.ok(stored !== null);
     const parsed = JSON.parse(stored);
     assert.strictEqual(parsed.addressHash, identity.addressHash);
   });

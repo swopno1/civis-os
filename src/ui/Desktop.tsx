@@ -6,8 +6,10 @@ import './desktop.css';
 import { WindowManager } from './components/WindowManager';
 import { useWindowManager } from './hooks/useWindowManager.ts';
 import { moduleManager } from '../core/ModuleManager';
+import type { CivisPermission } from '../core/ICivisModule';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
 import { Button } from './components/Button';
+import { Modal } from './components/Modal';
 
 export function Desktop() {
   const {
@@ -27,6 +29,11 @@ export function Desktop() {
   const moduleContainers = useRef<Map<string, HTMLDivElement>>(new Map());
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [highContrast, setHighContrast] = useState<boolean | null>(null);
+  const [permissionRequest, setPermissionRequest] = useState<{
+    moduleId: string;
+    permission: CivisPermission;
+    resolve: (granted: boolean) => void;
+  } | null>(null);
 
   // Load high contrast preference
   useEffect(() => {
@@ -74,6 +81,12 @@ export function Desktop() {
 
   // Initialize basic system stats and RNS Identity
   useEffect(() => {
+    moduleManager.setPermissionHandler(async (moduleId, permission) => {
+      return new Promise((resolve) => {
+        setPermissionRequest({ moduleId, permission, resolve });
+      });
+    });
+
     RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
       setRnsIdentity(identity);
     });
@@ -164,6 +177,43 @@ export function Desktop() {
 
   return (
     <div className={`desktop-environment ${highContrast === true ? 'high-contrast' : ''}`}>
+      <Modal
+        isOpen={!!permissionRequest}
+        title="Permission Request"
+        onClose={() => {
+          permissionRequest?.resolve(false);
+          setPermissionRequest(null);
+        }}
+        footer={
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', width: '100%' }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                permissionRequest?.resolve(false);
+                setPermissionRequest(null);
+              }}
+            >
+              Deny
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                permissionRequest?.resolve(true);
+                setPermissionRequest(null);
+              }}
+            >
+              Allow
+            </Button>
+          </div>
+        }
+      >
+        <p>
+          Module <strong>{permissionRequest?.moduleId}</strong> is requesting permission for:
+          <br />
+          <code>{permissionRequest?.permission}</code>
+        </p>
+      </Modal>
+
       <main className="workspace">
         <div className="desktop-icons">
           <Button
