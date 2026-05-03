@@ -1,5 +1,6 @@
 import type { ICivisModule, ICivisModuleContext, CivisPermission } from './ICivisModule';
 import { CivisStorage } from './Storage';
+import { meshService } from './MeshService';
 
 export type PermissionHandler = (moduleId: string, permission: CivisPermission) => Promise<boolean>;
 
@@ -133,14 +134,17 @@ export class ModuleManager {
           throw new Error(`Module ${moduleId} does not have mesh permissions.`);
         }
         return {
-          send: (data: any) => {
+          send: async (data: any) => {
             if (!hasWrite) throw new Error(`Permission mesh:write denied for module ${moduleId}`);
-            console.log(`[${moduleId}] Mesh send:`, data);
+            const payload = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+            await meshService.sendPacket(payload);
+            console.log(`[${moduleId}] Mesh packet sent`);
           },
-          // Dummy listen method
-          listen: (_callback: (data: any) => void) => {
+          listen: (callback: (data: any) => void) => {
             if (!hasRead) throw new Error(`Permission mesh:read denied for module ${moduleId}`);
-            console.log(`[${moduleId}] Mesh listen registered`);
+            meshService.registerHandler(callback);
+            console.log(`[${moduleId}] Mesh listener registered`);
+            return () => meshService.unregisterHandler(callback);
           }
         };
       },

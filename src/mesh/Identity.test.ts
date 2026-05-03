@@ -1,24 +1,53 @@
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 
-// Mock localStorage BEFORE importing RNSIdentityManager
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; }
-  };
-})();
-
-Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, writable: true });
+// Mock essential browser APIs that Storage.ts uses.
+const idbStore: Record<string, any> = {};
+(globalThis as any).indexedDB = {
+  open: () => {
+    const req: any = {};
+    setTimeout(() => {
+      req.result = {
+        objectStoreNames: { contains: () => true },
+        transaction: () => ({
+          objectStore: () => ({
+            get: (key: string) => {
+              const r: any = {};
+              setTimeout(() => {
+                r.result = idbStore[key];
+                r.onsuccess();
+              }, 0);
+              return r;
+            },
+            put: (val: any, key: string) => {
+              const r: any = {};
+              setTimeout(() => {
+                idbStore[key] = val;
+                r.onsuccess();
+              }, 0);
+              return r;
+            },
+            delete: (key: string) => {
+              const r: any = {};
+              setTimeout(() => {
+                delete idbStore[key];
+                r.onsuccess();
+              }, 0);
+              return r;
+            }
+          })
+        })
+      };
+      req.onsuccess({ target: req });
+    }, 0);
+    return req;
+  }
+};
 
 // Mock crypto.subtle
 const cryptoMock = {
   subtle: {
     digest: async (_algorithm: string, _data: Uint8Array) => {
-      // Mock SHA-256 by returning a fixed buffer
       return new Uint8Array(32).fill(3).buffer;
     }
   },
@@ -37,7 +66,7 @@ import { RNSIdentityManager } from './Identity.ts';
 
 describe('RNSIdentityManager', () => {
   beforeEach(() => {
-    localStorage.clear();
+    for (const key in idbStore) delete idbStore[key];
   });
 
   test('generateIdentity creates and persists a new identity', async () => {
@@ -48,16 +77,15 @@ describe('RNSIdentityManager', () => {
     assert.ok(typeof identity.addressHash === 'string');
     assert.strictEqual(identity.addressHash.length, 32); // 16 bytes hex encoded
 
-    const stored = localStorage.getItem('civisos_rns_identity');
-    assert.ok(stored !== null);
-    const parsed = JSON.parse(stored);
-    assert.strictEqual(parsed.addressHash, identity.addressHash);
+    const stored = idbStore['civisos_rns_identity'];
+    assert.ok(stored !== undefined);
+    assert.strictEqual(stored.addressHash, identity.addressHash);
   });
 
   test('loadOrGenerateIdentity generates new if none exists', async () => {
     const identity = await RNSIdentityManager.loadOrGenerateIdentity();
     assert.ok(identity.addressHash);
-    const stored = localStorage.getItem('civisos_rns_identity');
+    const stored = idbStore['civisos_rns_identity'];
     assert.ok(stored);
   });
 
@@ -70,24 +98,11 @@ describe('RNSIdentityManager', () => {
     assert.strictEqual(loadedIdentity.addressHash, initialIdentity.addressHash);
   });
 
-  test('loadOrGenerateIdentity generates new if existing is invalid JSON', async () => {
-    localStorage.setItem('civisos_rns_identity', 'invalid-json');
-
-    // We expect a console.error but we want it to continue
-    const identity = await RNSIdentityManager.loadOrGenerateIdentity();
-
-    assert.ok(identity.addressHash);
-    // Should have overwritten invalid JSON
-    const stored = localStorage.getItem('civisos_rns_identity');
-    assert.notStrictEqual(stored, 'invalid-json');
-    assert.ok(stored && stored.startsWith('{'));
-  });
-
   test('destroyIdentity removes identity from storage', async () => {
     await RNSIdentityManager.generateIdentity();
-    assert.ok(localStorage.getItem('civisos_rns_identity'));
+    assert.ok(idbStore['civisos_rns_identity']);
 
-    RNSIdentityManager.destroyIdentity();
-    assert.strictEqual(localStorage.getItem('civisos_rns_identity'), null);
+    await RNSIdentityManager.destroyIdentity();
+    assert.strictEqual(idbStore['civisos_rns_identity'], undefined);
   });
 });

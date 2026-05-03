@@ -8,6 +8,14 @@ export class HardwareBridge {
   private port: SerialPort | null = null;
   private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
+  private onDataReceived: (data: Uint8Array) => void = () => {};
+
+  /**
+   * Set a callback for incoming data
+   */
+  public setOnDataReceived(callback: (data: Uint8Array) => void) {
+    this.onDataReceived = callback;
+  }
 
   /**
    * Request user permission and connect to a serial device
@@ -70,7 +78,7 @@ export class HardwareBridge {
   private handleIncomingData(data: Uint8Array) {
     // In a real implementation, this would parse Reticulum protocol frames
     console.log(`[HardwareBridge] Received ${data.length} bytes from radio.`);
-    // TODO: Dispatch to OS Mesh Event Bus
+    this.onDataReceived(data);
   }
 
   /**

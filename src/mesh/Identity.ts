@@ -1,5 +1,6 @@
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { Hex } from '../core/Hex.ts';
+import { CivisStorage } from '../core/Storage.ts';
 
 /**
  * Reticulum Network Stack (RNS) Identity Manager
@@ -21,14 +22,13 @@ export class RNSIdentityManager {
    * Loads the existing identity from local storage, or generates a new one if none exists.
    */
   static async loadOrGenerateIdentity(): Promise<IRNSIdentity> {
-    const existing = localStorage.getItem(STORAGE_KEY);
+    const existing = await CivisStorage.get<any>(STORAGE_KEY);
     if (existing) {
       try {
-        const parsed = JSON.parse(existing);
         return {
-          privateKey: this.hexToBytes(parsed.privateKey),
-          publicKey: this.hexToBytes(parsed.publicKey),
-          addressHash: parsed.addressHash
+          privateKey: this.hexToBytes(existing.privateKey),
+          publicKey: this.hexToBytes(existing.publicKey),
+          addressHash: existing.addressHash
         };
       } catch (err) {
         console.error('Failed to parse existing RNS identity, generating new one.', err);
@@ -60,11 +60,11 @@ export class RNSIdentityManager {
     };
 
     // 3. Persist locally
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    await CivisStorage.set(STORAGE_KEY, {
       privateKey: this.bytesToHex(privateKey),
       publicKey: this.bytesToHex(publicKey),
       addressHash
-    }));
+    });
 
     return identity;
   }
@@ -72,8 +72,8 @@ export class RNSIdentityManager {
   /**
    * Wipes the identity from the device. Used in panic/SOS scenarios.
    */
-  static destroyIdentity() {
-    localStorage.removeItem(STORAGE_KEY);
+  static async destroyIdentity() {
+    await CivisStorage.delete(STORAGE_KEY);
     console.warn('[RNS] Local identity destroyed.');
   }
 
