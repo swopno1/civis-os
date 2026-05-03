@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import nacl from 'tweetnacl';
-import { CryptoVault } from '../../core/Crypto';
-import type { EncryptedPackage } from '../../core/Crypto';
+import { CryptoVault } from '../../core/Crypto.ts';
+import type { EncryptedPackage } from '../../core/Crypto.ts';
+import type { ICivisModuleContext } from '../../core/ICivisModule.ts';
 import './Vault.css';
 
 interface VaultFile {
@@ -11,63 +12,88 @@ interface VaultFile {
   timestamp: number;
 }
 
-export function Vault() {
+interface VaultProps {
+  context: ICivisModuleContext;
+}
+
+export function Vault({ context }: VaultProps) {
   const [files, setFiles] = useState<VaultFile[]>([]);
   const [vaultKeyPair, setVaultKeyPair] = useState<nacl.BoxKeyPair | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [storage, setStorage] = useState<any>(null);
 
-  // Load or generate vault keypair from local storage
+  // Initialize storage and load keys/files
   useEffect(() => {
-    const stored = localStorage.getItem('civisos_vault_keys');
-    if (stored) {
-      const { publicKey, secretKey } = JSON.parse(stored);
-      setVaultKeyPair({
-        publicKey: CryptoVault.fromHex(publicKey),
-        secretKey: CryptoVault.fromHex(secretKey)
-      });
-    } else {
-      const keys = CryptoVault.generateKeyPair();
-      localStorage.setItem('civisos_vault_keys', JSON.stringify({
-        publicKey: CryptoVault.toHex(keys.publicKey),
-        secretKey: CryptoVault.toHex(keys.secretKey)
-      }));
-      setVaultKeyPair(keys);
-    }
-
-    const storedFiles = localStorage.getItem('civisos_vault_files');
-    if (storedFiles) {
+    const initVault = async () => {
       try {
-        const parsed = JSON.parse(storedFiles);
-        // Convert hex strings back to Uint8Arrays
-        const hydratedFiles = parsed.map((f: any) => ({
-          ...f,
-          encryptedPackage: {
-            ciphertext: CryptoVault.fromHex(f.encryptedPackage.ciphertext),
-            nonce: CryptoVault.fromHex(f.encryptedPackage.nonce),
-            ephemeralPublicKey: CryptoVault.fromHex(f.encryptedPackage.ephemeralPublicKey)
-          }
-        }));
-        setFiles(hydratedFiles);
-      } catch (e) {
-        console.error("Failed to load vault files", e);
-      }
-    }
-    setIsInitialized(true);
-  }, []);
+        const readGranted = await context.requestPermission('storage:read');
+        const writeGranted = await context.requestPermission('storage:write');
 
-  // Save files to local storage when updated
-  useEffect(() => {
-    if (!isInitialized) return;
-    const serialized = files.map(f => ({
-      ...f,
-      encryptedPackage: {
-        ciphertext: CryptoVault.toHex(f.encryptedPackage.ciphertext),
-        nonce: CryptoVault.toHex(f.encryptedPackage.nonce),
-        ephemeralPublicKey: CryptoVault.toHex(f.encryptedPackage.ephemeralPublicKey)
+        if (!readGranted || !writeGranted) {
+          console.error("Storage permissions denied for Vault");
+          return;
+        }
+
+        const storageInstance = await context.getStorageInstance('vault-data');
+        setStorage(storageInstance);
+
+        // Load or generate vault keypair
+        const storedKeys = await storageInstance.get('civisos_vault_keys');
+        let keyPair: nacl.BoxKeyPair;
+        if (storedKeys) {
+          keyPair = {
+            publicKey: CryptoVault.fromHex(storedKeys.publicKey),
+            secretKey: CryptoVault.fromHex(storedKeys.secretKey)
+          };
+        } else {
+          keyPair = CryptoVault.generateKeyPair();
+          await storageInstance.put('civisos_vault_keys', {
+            publicKey: CryptoVault.toHex(keyPair.publicKey),
+            secretKey: CryptoVault.toHex(keyPair.secretKey)
+          });
+        }
+        setVaultKeyPair(keyPair);
+
+        // Load files
+        const storedFiles = await storageInstance.get('civisos_vault_files') as any[];
+        if (storedFiles) {
+          const hydratedFiles = storedFiles.map((f: any) => ({
+            ...f,
+            encryptedPackage: {
+              ciphertext: CryptoVault.fromHex(f.encryptedPackage.ciphertext),
+              nonce: CryptoVault.fromHex(f.encryptedPackage.nonce),
+              ephemeralPublicKey: CryptoVault.fromHex(f.encryptedPackage.ephemeralPublicKey)
+            }
+          }));
+          setFiles(hydratedFiles);
+        }
+        setIsInitialized(true);
+      } catch (err) {
+        console.error("Failed to initialize vault", err);
       }
-    }));
-    localStorage.setItem('civisos_vault_files', JSON.stringify(serialized));
-  }, [files, isInitialized]);
+    };
+
+    initVault();
+  }, [context]);
+
+  // Save files to storage when updated
+  useEffect(() => {
+    if (!isInitialized || !storage) return;
+
+    const saveFiles = async () => {
+      const serialized = files.map(f => ({
+        ...f,
+        encryptedPackage: {
+          ciphertext: CryptoVault.toHex(f.encryptedPackage.ciphertext),
+          nonce: CryptoVault.toHex(f.encryptedPackage.nonce),
+          ephemeralPublicKey: CryptoVault.toHex(f.encryptedPackage.ephemeralPublicKey)
+        }
+      }));
+      await storage.put('civisos_vault_files', serialized);
+    };
+
+    saveFiles();
+  }, [files, isInitialized, storage]);
 
   const handleFileUpload = async (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -116,6 +142,10 @@ export function Vault() {
   const deleteFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
   };
+
+  if (!isInitialized) {
+    return <div className="vault-module">Initializing secure vault...</div>;
+  }
 
   return (
     <div className="vault-module">

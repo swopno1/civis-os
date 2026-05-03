@@ -9,8 +9,10 @@ import { moduleManager } from '../core/ModuleManager';
 import type { IPermissionRequest } from '../core/PermissionService';
 import { permissionService } from '../core/PermissionService';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
+import { VaultModule } from '../modules/VaultModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
+import { meshService } from '../core/MeshService';
 
 export function Desktop() {
   const {
@@ -86,6 +88,10 @@ export function Desktop() {
       return await permissionService.requestPermission(moduleId, permission);
     });
 
+    meshService.setStatusChangeHandler((status) => {
+      setMeshStatus(status);
+    });
+
     RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
       setRnsIdentity(identity);
     });
@@ -93,6 +99,7 @@ export function Desktop() {
     const initModules = async () => {
       try {
         await moduleManager.registerModule(new HelloWorldModule());
+        await moduleManager.registerModule(new VaultModule());
       } catch (e) {
         console.warn('Module registration error:', e);
       }
@@ -234,7 +241,7 @@ export function Desktop() {
           <Button
             variant="icon"
             className="desktop-icon" 
-            onClick={() => openWindow('vault', 'CivisVault', <div>Encrypted Storage Loading...</div>)}
+            onClick={() => openModuleWindow('org.civisos.vault', 'CivisVault')}
           >
             <div className="icon-placeholder">🔒</div>
             <span>CivisVault</span>
@@ -321,12 +328,20 @@ export function Desktop() {
           <div
             className={`tray-item mesh-status ${meshStatus.toLowerCase().replace(' ', '-')}`}
             title={`Mesh Status: ${meshStatus}`}
-            onClick={() => {
-              // Cycle through statuses for demo/dev purposes if desired,
-              // but normally this would be driven by the mesh manager.
-              const statuses: ('Offline' | 'Local Mesh' | 'Global')[] = ['Offline', 'Local Mesh', 'Global'];
-              const next = statuses[(statuses.indexOf(meshStatus) + 1) % statuses.length];
-              setMeshStatus(next);
+            onClick={async () => {
+              if (meshStatus === 'Offline') {
+                try {
+                  await meshService.connectHardware();
+                } catch (e) {
+                  console.error('Failed to connect hardware:', e);
+                  // For demo, if Serial API is not available/fails, just cycle
+                  setMeshStatus('Local Mesh');
+                }
+              } else if (meshStatus === 'Local Mesh') {
+                setMeshStatus('Global');
+              } else {
+                await meshService.disconnectHardware();
+              }
             }}
             style={{ cursor: 'pointer' }}
           >

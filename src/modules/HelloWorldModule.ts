@@ -4,10 +4,11 @@ export class HelloWorldModule implements ICivisModule {
   public id = 'org.civisos.helloworld';
   public name = 'Hello World';
   public icon = '👋';
-  public permissions: CivisPermission[] = ['storage:read', 'storage:write', 'hardware:serial'];
+  public permissions: CivisPermission[] = ['storage:read', 'storage:write', 'hardware:serial', 'mesh:read', 'mesh:write'];
 
   private context?: ICivisModuleContext;
   private container?: HTMLElement;
+  private meshCleanup?: () => void;
 
   public async init(context: ICivisModuleContext): Promise<void> {
     this.context = context;
@@ -68,6 +69,15 @@ export class HelloWorldModule implements ICivisModule {
           </button>
           <div id="serial-status" style="font-size: 0.8rem; margin-top: 5px;">Not requested</div>
         </div>
+        <div style="margin-top: 15px; border-top: 1px solid #555; padding-top: 10px;">
+          <strong>Mesh Networking:</strong><br/>
+          <button id="test-mesh-btn" style="margin-top: 5px; padding: 5px 10px; cursor: pointer; background: #e67e22; color: white; border: none; border-radius: 4px;">
+            Send Mesh Ping
+          </button>
+          <div id="mesh-status-log" style="font-size: 0.8rem; margin-top: 5px; max-height: 60px; overflow-y: auto; background: #222; padding: 5px;">
+            Waiting for packets...
+          </div>
+        </div>
       </div>
     `;
 
@@ -113,9 +123,57 @@ export class HelloWorldModule implements ICivisModule {
         }
       }
     });
+
+    const meshBtn = this.container.querySelector('#test-mesh-btn');
+    meshBtn?.addEventListener('click', async () => {
+      if (this.context) {
+        try {
+          const readGranted = await this.context.requestPermission('mesh:read');
+          const writeGranted = await this.context.requestPermission('mesh:write');
+          if (!readGranted || !writeGranted) {
+            alert('Mesh permissions denied');
+            return;
+          }
+
+          const mesh = this.context.getMeshClient();
+          await mesh.send('PING from HelloWorld');
+
+          const log = this.container?.querySelector('#mesh-status-log');
+          if (log) {
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] Sent PING`;
+            log.appendChild(entry);
+          }
+        } catch (e) {
+          console.error('Mesh send failed', e);
+          alert('Error: ' + (e as Error).message);
+        }
+      }
+    });
+
+    if (this.context) {
+      try {
+        const mesh = this.context.getMeshClient();
+        this.meshCleanup = mesh.listen((data: any) => {
+          const log = this.container?.querySelector('#mesh-status-log');
+          if (log) {
+            const entry = document.createElement('div');
+            const message = typeof data === 'string' ? data : new TextDecoder().decode(data);
+            entry.textContent = `[${new Date().toLocaleTimeString()}] RECV: ${message}`;
+            log.appendChild(entry);
+          }
+        });
+      } catch (e) {
+        console.warn('Mesh listen not available yet', e);
+      }
+    }
   }
 
   public unmount(): void {
+    if (this.meshCleanup) {
+      this.meshCleanup();
+      this.meshCleanup = undefined;
+    }
     if (this.container) {
       this.container.innerHTML = '';
     }
