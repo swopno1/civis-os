@@ -14,7 +14,8 @@ export function Landing({ onBootOS }: LandingProps) {
         <header className="landing-header">
           <div className="logo-placeholder">🌍</div>
           <h1>CivisOS</h1>
-          <h2>The Resilience Operating System</h2>
+          <h2>Your Digital Lifeboat</h2>
+          <p className="subtitle">The Resilience Operating System</p>
         </header>
 
         <section className="landing-content">
@@ -60,7 +61,7 @@ export function Landing({ onBootOS }: LandingProps) {
           </div>
 
           <div className="action-panel">
-            <Button size="large" onClick={onBootOS} className="boot-btn">
+            <Button variant="primary" onClick={onBootOS} className="boot-btn" style={{ padding: '1rem 2rem', fontSize: '1.2rem' }}>
               Boot CivisOS Desktop
             </Button>
             <div className="repo-links">

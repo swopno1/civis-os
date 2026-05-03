@@ -1,34 +1,35 @@
 import type { ComponentChildren } from 'preact';
 import './Button.css';
 
-export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
-  type?: 'button' | 'submit' | 'reset';
-  onClick?: (e: MouseEvent) => void;
+interface ButtonProps {
   children: ComponentChildren;
+  onClick?: (e: MouseEvent) => void;
+  variant?: 'primary' | 'secondary' | 'danger' | 'icon';
   className?: string;
-  disabled?: boolean;
   title?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  style?: any;
 }
 
 export function Button({ 
-  variant = 'primary', 
-  size = 'medium',
-  type = 'button',
-  onClick, 
   children, 
+  onClick,
+  variant = 'secondary',
   className = '', 
+  title,
   disabled = false,
-  title
+  type = 'button',
+  style
 }: ButtonProps) {
   return (
-    <button 
+    <button
       type={type}
-      className={`civis-btn civis-btn-${variant} civis-btn-${size} ${className}`}
+      className={`civis-button civis-button--${variant} ${className}`}
       onClick={onClick}
-      disabled={disabled}
       title={title}
+      disabled={disabled}
+      style={style}
     >
       {children}
     </button>

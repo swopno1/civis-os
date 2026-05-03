@@ -27,7 +27,7 @@
 
 .landing-header .logo-placeholder {
   font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-block-end: 1rem;
 }
 
 .landing-header h1 {
@@ -38,9 +38,18 @@
 }
 
 .landing-header h2 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: var(--os-primary, #3498db);
-  margin-top: 0.5rem;
+  margin-block-start: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.landing-header .subtitle {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin-block-start: 0.5rem;
   font-weight: 400;
 }
 
@@ -75,11 +84,12 @@
 .pillar-icon {
   font-size: 2rem;
   display: block;
-  margin-bottom: 0.75rem;
+  margin-block-end: 0.75rem;
 }
 
 .pillar-item h3 {
-  margin: 0 0 0.5rem 0;
+  margin-block: 0 0.5rem;
+  margin-inline: 0;
   font-size: 1.1rem;
   color: var(--os-primary, #3498db);
 }
@@ -99,7 +109,7 @@
 }
 
 .status-panel h3 {
-  margin-top: 0;
+  margin-block-start: 0;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.7);
 }
@@ -112,7 +122,7 @@
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  margin-bottom: 0.5rem;
+  margin-block-end: 0.5rem;
 }
 
 .status-indicator.ready {
@@ -152,7 +162,7 @@
   flex-direction: column;
   align-items: center;
   gap: 2rem;
-  margin-top: 3rem;
+  margin-block-start: 3rem;
 }
 
 .boot-btn {
@@ -189,7 +199,7 @@
 }
 
 .landing-footer {
-  margin-top: 4rem;
+  margin-block-start: 4rem;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.4);
 }

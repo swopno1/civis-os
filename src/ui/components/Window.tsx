@@ -70,8 +70,8 @@ export function Window({
 
   const style = {
     zIndex: zIndex || 10,
-    top: isMaximized ? 0 : (position?.y || '10%'),
-    left: isMaximized ? 0 : (position?.x || '10%'),
+    insetBlockStart: isMaximized ? 0 : (position?.y || '10%'),
+    insetInlineStart: isMaximized ? 0 : (position?.x || '10%'),
     width: isMaximized ? '100%' : undefined,
     height: isMaximized ? 'calc(100% - 48px)' : undefined,
     borderRadius: isMaximized ? '0' : undefined,
