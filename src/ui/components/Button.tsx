@@ -27,7 +27,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`civis-button civis-button--${variant} civis-button--${size} ${className}`}
+      className={`civis-btn civis-btn-${variant} civis-btn-${size} ${className}`}
       onClick={onClick}
       title={title}
       disabled={disabled}

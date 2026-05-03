@@ -7,27 +7,28 @@
 }
 
 .civis-input-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--os-primary, #00ff00);
+  text-transform: uppercase;
 }
 
 .civis-input {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
-  border-radius: 6px;
-  padding: 0.6rem 0.8rem;
-  color: var(--os-text, #ecf0f1);
+  background: #111;
+  border: 2px solid var(--os-border, #333);
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: var(--os-text, #fff);
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: var(--mono, monospace);
   width: 100%;
   box-sizing: border-box;
+  min-height: 44px;
 }
 
 .civis-input:focus {
   outline: none;
-  border-color: var(--os-primary, #3498db);
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  border-color: var(--os-primary, #00ff00);
 }
 
 .civis-input:disabled {
@@ -36,10 +37,11 @@
 }
 
 .civis-input-error {
-  border-color: var(--os-urgent, #e74c3c);
+  border-color: var(--os-urgent, #ff8c00);
 }
 
 .civis-input-error-text {
-  font-size: 0.75rem;
-  color: var(--os-urgent, #e74c3c);
+  font-size: 0.8rem;
+  color: var(--os-urgent, #ff8c00);
+  font-weight: 700;
 }

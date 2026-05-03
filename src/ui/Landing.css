@@ -3,136 +3,126 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, var(--os-bg-accent, #2c3e50) 0%, var(--os-bg, #1e1e1e) 100%);
-  color: var(--os-text, #ecf0f1);
-  padding: 2rem;
+  background: #000;
+  color: #fff;
+  padding: 1rem;
 }
 
 .landing-container {
   max-width: 800px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 3rem;
-  backdrop-filter: blur(20px);
+  width: 100%;
+  border: 2px solid var(--os-primary, #00ff00);
+  background: #000;
+  padding: 2rem;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  animation: fadeUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .landing-header .logo-placeholder {
-  font-size: 4rem;
+  font-size: 3rem;
   margin-block-end: 1rem;
 }
 
 .landing-header h1 {
   font-size: 3.5rem;
   margin: 0;
-  font-weight: 800;
-  letter-spacing: -1px;
+  color: var(--os-primary, #00ff00);
+  text-transform: uppercase;
 }
 
 .landing-header h2 {
-  font-size: 2rem;
-  color: var(--os-primary, #3498db);
-  margin-block-start: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  font-size: 1.5rem;
+  color: #fff;
+  margin-block-start: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
 }
 
 .landing-header .subtitle {
-  font-size: 1.25rem;
-  color: #94a3b8;
+  font-size: 1.1rem;
+  color: var(--os-urgent, #ff8c00);
   margin-block-start: 0.5rem;
-  font-weight: 400;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .mission-statement {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   margin: 2rem 0;
-  color: rgba(255, 255, 255, 0.9);
+  color: #fff;
+  text-align: justify;
+  border-block: 1px solid #333;
+  padding: 1rem 0;
 }
 
 .pillars-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin: 2.5rem 0;
-  text-align: left;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
 }
 
 .pillar-item {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.2s, background 0.2s;
+  border: 1px solid #333;
+  padding: 1rem;
+  transition: border-color 0.2s;
 }
 
 .pillar-item:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--os-primary, #00ff00);
 }
 
 .pillar-icon {
   font-size: 2rem;
   display: block;
-  margin-block-end: 0.75rem;
+  margin-block-end: 0.5rem;
 }
 
 .pillar-item h3 {
-  margin-block: 0 0.5rem;
-  margin-inline: 0;
-  font-size: 1.1rem;
-  color: var(--os-primary, #3498db);
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--os-primary, #00ff00);
+  text-transform: uppercase;
 }
 
 .pillar-item p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.6);
+  color: #ccc;
 }
 
 .status-panel {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 1.5rem;
+  border: 1px solid #333;
+  padding: 1rem;
   margin: 2rem 0;
+  background: #111;
 }
 
 .status-panel h3 {
   margin-block-start: 0;
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  text-transform: uppercase;
 }
 
 .status-indicator {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
+  border: 1px solid currentColor;
   margin-block-end: 0.5rem;
+  text-transform: uppercase;
 }
 
 .status-indicator.ready {
-  background: rgba(46, 204, 113, 0.2);
-  color: #2ecc71;
+  color: var(--os-primary, #00ff00);
 }
 
 .status-indicator.pending {
-  background: rgba(241, 196, 15, 0.2);
-  color: #f1c40f;
+  color: var(--os-urgent, #ff8c00);
 }
 
 .dot {
@@ -142,36 +132,17 @@
   background: currentColor;
 }
 
-.status-indicator.pending .dot {
-  animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-  from { opacity: 0.4; }
-  to { opacity: 1; }
-}
-
 .status-detail {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0;
+  font-size: 0.85rem;
+  color: #888;
 }
 
 .action-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  margin-block-start: 3rem;
-}
-
-.boot-btn {
-  font-size: 1.25rem !important;
-  padding: 1rem 2.5rem !important;
-  border-radius: 30px !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+  gap: 1.5rem;
+  margin-block-start: 2rem;
 }
 
 .repo-links {
@@ -183,31 +154,25 @@
 }
 
 .repo-link {
-  color: rgba(255, 255, 255, 0.6);
+  color: #888;
   text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.2s;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .repo-link:hover {
-  color: white;
-  text-decoration: underline;
+  color: var(--os-primary, #00ff00);
 }
 
 .separator {
-  color: rgba(255, 255, 255, 0.2);
+  color: #333;
 }
 
 .landing-footer {
-  margin-block-start: 4rem;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.landing-footer p {
-  margin: 0.25rem 0;
-}
-
-.license-info {
-  font-weight: 600;
+  margin-block-start: 3rem;
+  font-size: 0.8rem;
+  color: #666;
+  border-block-start: 1px solid #333;
+  padding-block-start: 1rem;
 }
