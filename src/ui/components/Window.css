@@ -2,51 +2,35 @@
   position: absolute;
   width: 600px;
   height: 400px;
-  background: var(--os-window-bg, rgba(44, 62, 80, 0.95));
-  border: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background: #000;
+  border: 2px solid var(--os-primary, #00ff00);
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(20px);
   overflow: hidden;
-  animation: windowOpen 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 10;
 }
 
 .civis-window.active {
-  box-shadow: 0 15px 40px rgba(0,0,0,0.7);
-  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
 }
 
 .civis-window.maximized {
-  box-shadow: none;
-  animation: none;
-}
-
-.civis-window.dragging {
-  opacity: 0.9;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-}
-
-.civis-window.dragging .civis-window-header {
-  cursor: grabbing;
-}
-
-@keyframes windowOpen {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  border-radius: 0;
+  border: none;
+  border-block-end: 2px solid var(--os-primary, #00ff00);
 }
 
 .civis-window-header {
-  background: rgba(0,0,0,0.2);
+  background: #111;
   padding: 0.5rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-block-end: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  border-block-end: 2px solid var(--os-primary, #00ff00);
   cursor: grab;
   user-select: none;
+  min-height: 44px;
 }
 
 .civis-window-header:active {
@@ -54,10 +38,11 @@
 }
 
 .civis-window-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--os-text, #ecf0f1);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--os-primary, #00ff00);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .civis-window-controls {
@@ -67,7 +52,8 @@
 
 .civis-window-body {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1rem;
   overflow-y: auto;
-  color: rgba(255,255,255,0.8);
+  color: var(--os-text, #fff);
+  background: #000;
 }

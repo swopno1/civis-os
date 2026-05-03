@@ -35,7 +35,7 @@ export function Desktop() {
   // Load high contrast preference
   useEffect(() => {
     CivisStorage.get<boolean>('high_contrast').then(pref => {
-      setHighContrast(pref ?? false);
+      setHighContrast(pref ?? true);
     });
   }, []);
 

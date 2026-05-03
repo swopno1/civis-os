@@ -1,49 +1,50 @@
 .civis-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
-  border-radius: 12px;
+  background: #000;
+  border: 2px solid var(--os-border, #333);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: all 0.2s ease;
-  color: var(--os-text, #ecf0f1);
+  color: var(--os-text, #fff);
 }
 
 .civis-card.clickable {
   cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .civis-card.clickable:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--os-primary, #00ff00);
 }
 
 .civis-card-header {
-  padding: 1.25rem 1.5rem;
-  border-block-end: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  padding: 1rem;
+  border-block-end: 2px solid var(--os-border, #333);
+  background: #111;
 }
 
 .civis-card-title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  color: var(--os-primary, #00ff00);
+  text-transform: uppercase;
 }
 
 .civis-card-subtitle {
   margin-block-start: 0.25rem;
   margin-block-end: 0;
   font-size: 0.85rem;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .civis-card-body {
-  padding: 1.5rem;
+  padding: 1rem;
   flex: 1;
 }
 
 .civis-card-footer {
-  padding: 1rem 1.5rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-block-start: 1px solid var(--os-window-border, rgba(255, 255, 255, 0.1));
+  padding: 0.75rem 1rem;
+  background: #111;
+  border-block-start: 2px solid var(--os-border, #333);
 }

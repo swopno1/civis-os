@@ -1,34 +1,40 @@
 .civis-btn {
-  border: none;
-  border-radius: 6px;
+  border: 2px solid transparent;
+  border-radius: 4px;
   cursor: pointer;
-  font-family: var(--font-family, inherit);
-  font-weight: 600;
+  font-family: var(--sans, inherit);
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease;
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .civis-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 .civis-btn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 /* Sizes */
 .civis-btn-small {
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
+  min-height: 32px; /* Exception for small UI elements, but usually we prefer 44px */
 }
 
 .civis-btn-medium {
   padding: 0.5rem 1rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .civis-btn-large {
@@ -38,37 +44,42 @@
 
 /* Variants */
 .civis-btn-primary {
-  background-color: var(--os-primary, #3498db);
-  color: white;
+  background-color: var(--os-primary, #00ff00);
+  color: #000;
+  border-color: var(--os-primary, #00ff00);
 }
 .civis-btn-primary:hover:not(:disabled) {
-  background-color: #2980b9;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #000;
+  color: var(--os-primary, #00ff00);
 }
 
 .civis-btn-secondary {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--os-text, #ecf0f1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  color: var(--os-text, #fff);
+  border-color: var(--os-text, #fff);
 }
 .civis-btn-secondary:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--os-text, #fff);
+  color: #000;
 }
 
 .civis-btn-danger {
-  background-color: var(--os-urgent, #e74c3c);
-  color: white;
+  background-color: var(--os-urgent, #ff8c00);
+  color: #000;
+  border-color: var(--os-urgent, #ff8c00);
 }
 .civis-btn-danger:hover:not(:disabled) {
-  background-color: #c0392b;
-  box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+  background-color: #000;
+  color: var(--os-urgent, #ff8c00);
 }
 
-.civis-btn-ghost {
+.civis-btn-icon {
   background-color: transparent;
-  color: var(--os-text, #ecf0f1);
-  box-shadow: none;
+  color: var(--os-text, #fff);
+  border: 1px solid transparent;
+  padding: 0.5rem;
 }
-.civis-btn-ghost:hover:not(:disabled) {
+.civis-btn-icon:hover:not(:disabled) {
   background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
