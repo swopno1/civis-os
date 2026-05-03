@@ -4,7 +4,7 @@ export class HelloWorldModule implements ICivisModule {
   public id = 'org.civisos.helloworld';
   public name = 'Hello World';
   public icon = '👋';
-  public permissions: CivisPermission[] = ['storage:read', 'storage:write'];
+  public permissions: CivisPermission[] = ['storage:read', 'storage:write', 'hardware:serial'];
 
   private context?: ICivisModuleContext;
   private container?: HTMLElement;
@@ -21,6 +21,14 @@ export class HelloWorldModule implements ICivisModule {
       const storage = await this.context.getStorageInstance('hello-world-db');
       await storage.put('last_init', new Date().toISOString());
       console.log('Successfully wrote to storage during init');
+    }
+  }
+
+  public async onSaveState(): Promise<void> {
+    console.log(`${this.name} module saving state...`);
+    if (this.context) {
+      const storage = await this.context.getStorageInstance('hello-world-db');
+      await storage.put('last_save', new Date().toISOString());
     }
   }
 
@@ -54,6 +62,12 @@ export class HelloWorldModule implements ICivisModule {
         <button id="test-storage-btn" style="margin-top: 10px; padding: 5px 10px; cursor: pointer; background: #2c3e50; color: white; border: none; border-radius: 4px;">
           Increment Click Count
         </button>
+        <div style="margin-top: 15px;">
+          <button id="test-serial-btn" style="padding: 5px 10px; cursor: pointer; background: #2c3e50; color: white; border: none; border-radius: 4px;">
+            Request Serial Port
+          </button>
+          <div id="serial-status" style="font-size: 0.8rem; margin-top: 5px;">Not requested</div>
+        </div>
       </div>
     `;
 
@@ -75,6 +89,26 @@ export class HelloWorldModule implements ICivisModule {
         } catch (e) {
           console.error('Storage access failed', e);
           const status = this.container?.querySelector('#storage-status');
+          if (status) status.textContent = 'Error: ' + (e as Error).message;
+        }
+      }
+    });
+
+    const serialBtn = this.container.querySelector('#test-serial-btn');
+    serialBtn?.addEventListener('click', async () => {
+      if (this.context) {
+        try {
+          const serialGranted = await this.context.requestPermission('hardware:serial');
+          if (!serialGranted) {
+            alert('Serial permission denied');
+            return;
+          }
+          const port = await this.context.requestSerialPort();
+          const status = this.container?.querySelector('#serial-status');
+          if (status) status.textContent = 'Port acquired: ' + port;
+        } catch (e) {
+          console.error('Serial request failed', e);
+          const status = this.container?.querySelector('#serial-status');
           if (status) status.textContent = 'Error: ' + (e as Error).message;
         }
       }

@@ -6,7 +6,8 @@ import './desktop.css';
 import { WindowManager } from './components/WindowManager';
 import { useWindowManager } from './hooks/useWindowManager.ts';
 import { moduleManager } from '../core/ModuleManager';
-import type { CivisPermission } from '../core/ICivisModule';
+import type { IPermissionRequest } from '../core/PermissionService';
+import { permissionService } from '../core/PermissionService';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
@@ -29,11 +30,7 @@ export function Desktop() {
   const moduleContainers = useRef<Map<string, HTMLDivElement>>(new Map());
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [highContrast, setHighContrast] = useState<boolean | null>(null);
-  const [permissionRequest, setPermissionRequest] = useState<{
-    moduleId: string;
-    permission: CivisPermission;
-    resolve: (granted: boolean) => void;
-  } | null>(null);
+  const [permissionRequest, setPermissionRequest] = useState<IPermissionRequest | null>(null);
 
   // Load high contrast preference
   useEffect(() => {
@@ -81,10 +78,12 @@ export function Desktop() {
 
   // Initialize basic system stats and RNS Identity
   useEffect(() => {
+    permissionService.setOnPrompt((req) => {
+      setPermissionRequest(req);
+    });
+
     moduleManager.setPermissionHandler(async (moduleId, permission) => {
-      return new Promise((resolve) => {
-        setPermissionRequest({ moduleId, permission, resolve });
-      });
+      return await permissionService.requestPermission(moduleId, permission);
     });
 
     RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
@@ -154,10 +153,10 @@ export function Desktop() {
     );
   };
 
-  const closeWindow = (id: string) => {
+  const closeWindow = async (id: string) => {
     const win = windows.find(w => w.id === id);
     if (win?.isModule) {
-      moduleManager.unmountModule(id);
+      await moduleManager.unmountModule(id);
       moduleContainers.current.delete(id);
     }
     baseCloseWindow(id);
@@ -181,7 +180,7 @@ export function Desktop() {
         isOpen={!!permissionRequest}
         title="Permission Request"
         onClose={() => {
-          permissionRequest?.resolve(false);
+          permissionService.completeCurrentRequest(false);
           setPermissionRequest(null);
         }}
         footer={
@@ -189,7 +188,7 @@ export function Desktop() {
             <Button
               variant="secondary"
               onClick={() => {
-                permissionRequest?.resolve(false);
+                permissionService.completeCurrentRequest(false);
                 setPermissionRequest(null);
               }}
             >
@@ -198,7 +197,7 @@ export function Desktop() {
             <Button
               variant="primary"
               onClick={() => {
-                permissionRequest?.resolve(true);
+                permissionService.completeCurrentRequest(true);
                 setPermissionRequest(null);
               }}
             >
