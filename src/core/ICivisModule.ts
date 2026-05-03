@@ -7,16 +7,21 @@
 export type CivisPermission = 
   | 'mesh:read'    // Listen to local mesh events
   | 'mesh:write'   // Broadcast to local mesh
-  | 'storage:read' // Read from local DB
-  | 'storage:write'// Write to local DB
-  | 'hardware:usb' // Access serial ports
-  | 'hardware:bt'; // Access bluetooth
+  | 'storage:read'   // Read from local DB
+  | 'storage:write'  // Write to local DB
+  | 'hardware:serial'// Access serial ports
+  | 'hardware:usb'    // Access generic USB devices
+  | 'hardware:bt';   // Access bluetooth
 
 export interface ICivisModuleContext {
   // Methods provided to the module by the OS upon initialization
   requestPermission: (permission: CivisPermission) => Promise<boolean>;
   getStorageInstance: (namespace: string) => Promise<any>; // E.g., PouchDB instance
   getMeshClient: () => any; // E.g., Reticulum connection
+
+  // Hardware Bridging
+  requestSerialPort: (options?: SerialPortRequestOptions) => Promise<SerialPort>;
+  getSerialPorts: () => Promise<SerialPort[]>;
 }
 
 export interface ICivisModule {
@@ -64,6 +69,12 @@ export interface ICivisModule {
    * Called to resume background tasks from suspended state
    */
   resume: () => Promise<void>;
+
+  /**
+   * Called before the OS saves its state or the module window is closed.
+   * Useful for persisting unsaved data.
+   */
+  onSaveState?: () => Promise<void>;
   
   /**
    * Called before removing the module completely from the OS

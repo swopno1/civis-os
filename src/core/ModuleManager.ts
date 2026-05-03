@@ -8,6 +8,9 @@ export class ModuleManager {
   private contexts: Map<string, ICivisModuleContext> = new Map();
   private grantedPermissions: Map<string, Set<CivisPermission>> = new Map();
   private permissionHandler: PermissionHandler | null = null;
+  private claimedSerialPorts: Map<SerialPort, string> = new Map();
+  private moduleStorageUsage: Map<string, number> = new Map();
+  private readonly DEFAULT_QUOTA = 10 * 1024 * 1024; // 10MB per module
 
   constructor() {
     console.log('ModuleManager initialized');
@@ -67,7 +70,7 @@ export class ModuleManager {
           throw new Error(`Module ${moduleId} does not have storage permissions.`);
         }
 
-        const getFullKey = (key: string) => `mod:${moduleId}:${namespace}:${key}`;
+        const getFullKey = (key: string) => `civis_os/modules/${moduleId}/storage/${namespace}/${key}`;
 
         return {
           dbName: namespace,
@@ -77,11 +80,47 @@ export class ModuleManager {
           },
           put: async (key: string, val: any) => {
             if (!hasWrite) throw new Error(`Permission storage:write denied for module ${moduleId}`);
-            await CivisStorage.set(getFullKey(key), val);
+
+            const fullKey = getFullKey(key);
+            const oldVal = await CivisStorage.get(fullKey);
+            const oldSize = oldVal ? JSON.stringify(oldVal).length * 2 : 0;
+
+            const serialized = JSON.stringify(val);
+            const size = serialized.length * 2; // Rough estimate in bytes (UTF-16)
+
+            const usageKey = `quota:${moduleId}:usage`;
+            let currentUsage = this.moduleStorageUsage.get(moduleId);
+            if (currentUsage === undefined) {
+              currentUsage = await CivisStorage.get<number>(usageKey) || 0;
+            }
+
+            const newUsage = currentUsage - oldSize + size;
+            if (newUsage > this.DEFAULT_QUOTA) {
+              throw new Error(`Storage quota exceeded for module ${moduleId}`);
+            }
+
+            await CivisStorage.set(fullKey, val);
+            await CivisStorage.set(usageKey, newUsage);
+            this.moduleStorageUsage.set(moduleId, newUsage);
           },
           delete: async (key: string) => {
             if (!hasWrite) throw new Error(`Permission storage:write denied for module ${moduleId}`);
-            await CivisStorage.delete(getFullKey(key));
+            const fullKey = getFullKey(key);
+            const oldVal = await CivisStorage.get(fullKey);
+            if (oldVal) {
+              const oldSize = JSON.stringify(oldVal).length * 2;
+              const usageKey = `quota:${moduleId}:usage`;
+              let currentUsage = this.moduleStorageUsage.get(moduleId);
+              if (currentUsage === undefined) {
+                currentUsage = await CivisStorage.get<number>(usageKey) || 0;
+              }
+              const newUsage = Math.max(0, currentUsage - oldSize);
+              await CivisStorage.delete(fullKey);
+              await CivisStorage.set(usageKey, newUsage);
+              this.moduleStorageUsage.set(moduleId, newUsage);
+            } else {
+              await CivisStorage.delete(fullKey);
+            }
           }
         };
       },
@@ -104,6 +143,39 @@ export class ModuleManager {
             console.log(`[${moduleId}] Mesh listen registered`);
           }
         };
+      },
+      requestSerialPort: async (options?: SerialPortRequestOptions): Promise<SerialPort> => {
+        const perms = this.grantedPermissions.get(moduleId);
+        if (!perms?.has('hardware:serial')) {
+          throw new Error(`Permission hardware:serial denied for module ${moduleId}`);
+        }
+
+        if (!navigator.serial) {
+          throw new Error('Web Serial API is not supported in this browser.');
+        }
+
+        const port = await navigator.serial.requestPort(options);
+
+        // Device Locking check
+        const owner = this.claimedSerialPorts.get(port);
+        if (owner && owner !== moduleId) {
+          throw new Error(`Serial port is already claimed by module ${owner}`);
+        }
+
+        this.claimedSerialPorts.set(port, moduleId);
+        return port;
+      },
+      getSerialPorts: async (): Promise<SerialPort[]> => {
+        const perms = this.grantedPermissions.get(moduleId);
+        if (!perms?.has('hardware:serial')) {
+          throw new Error(`Permission hardware:serial denied for module ${moduleId}`);
+        }
+
+        if (!navigator.serial) {
+          return [];
+        }
+
+        return await navigator.serial.getPorts();
       }
     };
   }
@@ -115,9 +187,15 @@ export class ModuleManager {
     console.log(`Module ${moduleId} mounted.`);
   }
 
-  public unmountModule(moduleId: string): void {
+  public async unmountModule(moduleId: string): Promise<void> {
     const module = this.modules.get(moduleId);
     if (!module) throw new Error(`Module ${moduleId} not found.`);
+
+    // Call onSaveState if available before unmounting
+    if (module.onSaveState) {
+      await module.onSaveState();
+    }
+
     module.unmount();
     console.log(`Module ${moduleId} unmounted.`);
   }
@@ -143,6 +221,14 @@ export class ModuleManager {
     this.modules.delete(moduleId);
     this.contexts.delete(moduleId);
     this.grantedPermissions.delete(moduleId);
+
+    // Unclaim serial ports
+    for (const [port, owner] of this.claimedSerialPorts.entries()) {
+      if (owner === moduleId) {
+        this.claimedSerialPorts.delete(port);
+      }
+    }
+
     console.log(`Module ${moduleId} destroyed.`);
   }
 
