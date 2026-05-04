@@ -17,6 +17,31 @@
   text-align: center;
 }
 
+.language-selector-top {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-block-end: 2rem;
+}
+
+.lang-btn {
+  background: transparent;
+  border: 1px solid var(--os-primary, #00ff00);
+  color: var(--os-primary, #00ff00);
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.lang-btn:hover, .lang-btn.active {
+  background: var(--os-primary, #00ff00);
+  color: #000;
+}
+
 .landing-header .logo-placeholder {
   font-size: 3rem;
   margin-block-end: 1rem;

@@ -8,11 +8,13 @@ import { useWindowManager } from './hooks/useWindowManager';
 import { moduleManager } from '../core/ModuleManager';
 import type { IPermissionRequest } from '../core/PermissionService';
 import { permissionService } from '../core/PermissionService';
+import { useTranslation } from '../core/TranslationService.ts';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
 import { VaultModule } from '../modules/VaultModule';
 import { ChatModule } from '../modules/ChatModule';
 import { BulletinModule } from '../modules/BulletinModule';
 import { SenseModule } from '../modules/SenseModule';
+import { MeshMarketModule } from '../modules/MeshMarketModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
 import { meshService } from '../core/MeshService';
@@ -36,6 +38,7 @@ export function Desktop() {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [highContrast, setHighContrast] = useState<boolean | null>(null);
   const [permissionRequest, setPermissionRequest] = useState<IPermissionRequest | null>(null);
+  const { t, currentLang, setLanguage, supportedLanguages } = useTranslation();
 
   // Load high contrast preference
   useEffect(() => {
@@ -106,6 +109,7 @@ export function Desktop() {
         await moduleManager.registerModule(new ChatModule());
         await moduleManager.registerModule(new BulletinModule());
         await moduleManager.registerModule(new SenseModule());
+        await moduleManager.registerModule(new MeshMarketModule());
       } catch (e) {
         console.warn('Module registration error:', e);
       }
@@ -191,7 +195,7 @@ export function Desktop() {
     <div className={`desktop-environment ${highContrast === true ? 'high-contrast' : ''}`}>
       <Modal
         isOpen={!!permissionRequest}
-        title="Permission Request"
+        title={t('sys.perm_request')}
         onClose={() => {
           permissionService.completeCurrentRequest(false);
           setPermissionRequest(null);
@@ -205,7 +209,7 @@ export function Desktop() {
                 setPermissionRequest(null);
               }}
             >
-              Deny
+              {t('sys.deny')}
             </Button>
             <Button
               variant="primary"
@@ -214,7 +218,7 @@ export function Desktop() {
                 setPermissionRequest(null);
               }}
             >
-              Allow
+              {t('sys.allow')}
             </Button>
           </div>
         }
@@ -232,46 +236,55 @@ export function Desktop() {
             variant="icon"
             className="desktop-icon"
             id="icon-helloworld"
-            onClick={() => openModuleWindow('org.civisos.helloworld', 'Hello World')}
+            onClick={() => openModuleWindow('org.civisos.helloworld', t('sys.hello_world'))}
           >
             <div className="icon-placeholder">👋</div>
-            <span>Hello World</span>
+            <span>{t('sys.hello_world')}</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
             id="icon-chat"
-            onClick={() => openModuleWindow('org.civisos.chat', 'CivisChat')}
+            onClick={() => openModuleWindow('org.civisos.chat', t('sys.chat'))}
           >
             <div className="icon-placeholder">💬</div>
-            <span>CivisChat</span>
+            <span>{t('sys.chat')}</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
             id="icon-vault"
-            onClick={() => openModuleWindow('org.civisos.vault', 'CivisVault')}
+            onClick={() => openModuleWindow('org.civisos.vault', t('sys.vault'))}
           >
             <div className="icon-placeholder">🔒</div>
-            <span>CivisVault</span>
+            <span>{t('sys.vault')}</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
             id="icon-bulletin"
-            onClick={() => openModuleWindow('org.civisos.bulletin', 'CivisBulletin')}
+            onClick={() => openModuleWindow('org.civisos.bulletin', t('sys.bulletin'))}
           >
             <div className="icon-placeholder">📋</div>
-            <span>CivisBulletin</span>
+            <span>{t('sys.bulletin')}</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
             id="icon-sense"
-            onClick={() => openModuleWindow('org.civisos.sense', 'CivisSense')}
+            onClick={() => openModuleWindow('org.civisos.sense', t('sys.sense'))}
           >
             <div className="icon-placeholder">🌡️</div>
-            <span>CivisSense</span>
+            <span>{t('sys.sense')}</span>
+          </Button>
+          <Button
+            variant="icon"
+            className="desktop-icon"
+            id="icon-meshmarket"
+            onClick={() => openModuleWindow('org.civisos.meshmarket', t('sys.mesh_market'))}
+          >
+            <div className="icon-placeholder">🏪</div>
+            <span>{t('sys.mesh_market')}</span>
           </Button>
           <Button
             variant="icon"
@@ -336,9 +349,20 @@ export function Desktop() {
           <div className={`tray-item offline-readiness ${isOfflineReady ? 'ready' : 'syncing'}`} title={isOfflineReady ? 'Safe to disconnect: OS is fully cached offline' : 'Syncing: OS is caching for offline use'}>
             {isOfflineReady ? '💾 ✅' : '💾 ⏳'}
           </div>
+          <div className="tray-item lang-selector">
+            <select
+              value={currentLang}
+              onChange={(e) => setLanguage((e.target as HTMLSelectElement).value)}
+              className="lang-select"
+            >
+              {supportedLanguages.map(lang => (
+                <option key={lang.code} value={lang.code}>{lang.name}</option>
+              ))}
+            </select>
+          </div>
           <div
             className={`tray-item mesh-status ${meshStatus.toLowerCase().replace(' ', '-')}`}
-            title={`Mesh Status: ${meshStatus}`}
+            title={`${t('sys.mesh_status')}: ${meshStatus}`}
             onClick={async () => {
               if (meshStatus === 'Offline') {
                 try {
@@ -361,10 +385,10 @@ export function Desktop() {
             {meshStatus === 'Global' && '📡 🌍'}
             <span style={{ marginInlineStart: '0.25rem' }}>{meshStatus}</span>
           </div>
-          <div className="tray-item local-storage" title="Encrypted Storage Mounted">
+          <div className="tray-item local-storage" title={t('sys.storage')}>
             💽
           </div>
-          <div className="tray-item battery">
+          <div className="tray-item battery" title={t('sys.battery')}>
             🔋 {batteryLevel !== null ? `${batteryLevel}%` : '--'}
           </div>
           <div className="tray-item clock">

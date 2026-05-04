@@ -5,6 +5,8 @@ import { Vault } from '../ui/modules/Vault';
 export class VaultModule implements ICivisModule {
   public id = 'org.civisos.vault';
   public name = 'CivisVault';
+  public version = '1.0.0';
+  public author = 'CivisOS Core';
   public icon = '🔒';
   public permissions: CivisPermission[] = ['storage:read', 'storage:write'];
 

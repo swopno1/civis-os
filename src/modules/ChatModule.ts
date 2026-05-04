@@ -5,6 +5,8 @@ import { Chat } from '../ui/modules/Chat';
 export class ChatModule implements ICivisModule {
   public id = 'org.civisos.chat';
   public name = 'CivisChat';
+  public version = '1.0.0';
+  public author = 'CivisOS Core';
   public icon = '💬';
   public permissions: CivisPermission[] = ['mesh:read', 'mesh:write', 'storage:read', 'storage:write'];
 

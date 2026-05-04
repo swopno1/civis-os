@@ -36,6 +36,26 @@ export interface ICivisModule {
   name: string;
 
   /**
+   * Version of the module (SemVer)
+   */
+  version: string;
+
+  /**
+   * Author or organization
+   */
+  author: string;
+
+  /**
+   * Cryptographic signature of the module bundle (optional for local/dev)
+   */
+  signature?: string;
+
+  /**
+   * Module-specific translations
+   */
+  translations?: Record<string, Record<string, string>>;
+
+  /**
    * Base64 or SVG icon representing the module in the UI
    */
   icon: string;
