@@ -45,7 +45,7 @@ describe('MeshRouter & Traffic Neutrality', () => {
     const payload = new TextEncoder().encode('Hello Local');
     const rawPacket = await router.createPacket(LOCAL_ADDR, payload);
 
-    router.handleRawData(rawPacket);
+    await router.handleRawData(rawPacket);
 
     assert.ok(receivedPacket);
     assert.deepStrictEqual(receivedPacket.payload, payload);
@@ -66,7 +66,7 @@ describe('MeshRouter & Traffic Neutrality', () => {
     };
     const rawPacket = PacketSerializer.serialize(packet);
 
-    router.handleRawData(rawPacket);
+    await router.handleRawData(rawPacket);
 
     assert.strictEqual(receivedPacket, null);
     assert.ok(forwardedData);
@@ -91,7 +91,7 @@ describe('MeshRouter & Traffic Neutrality', () => {
     };
     const rawPacket = PacketSerializer.serialize(packet);
 
-    router.handleRawData(rawPacket);
+    await router.handleRawData(rawPacket);
 
     assert.ok(receivedPacket);
     assert.ok(forwardedData);

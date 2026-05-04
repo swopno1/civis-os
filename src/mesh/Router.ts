@@ -35,12 +35,12 @@ export class MeshRouter {
   /**
    * Process an incoming raw packet from the mesh
    */
-  public handleRawData(data: Uint8Array) {
+  public async handleRawData(data: Uint8Array) {
     try {
       const packet = PacketSerializer.deserialize(data);
 
       // 1. Deduplication (Traffic Neutrality preserved: we don't look at content)
-      const packetId = this.calculatePacketId(data);
+      const packetId = await this.calculatePacketId(data);
       if (this.processedPackets.has(packetId)) return;
       this.processedPackets.add(packetId);
       if (this.processedPackets.size > 1000) {
@@ -71,15 +71,26 @@ export class MeshRouter {
     }
   }
 
-  private calculatePacketId(data: Uint8Array): string {
+  private async calculatePacketId(data: Uint8Array): Promise<string> {
     // Deduplication should exclude mutable fields (like 'hops' at index 2)
-    // We'll use the sender (indices 3-18), destination (19-34), and the first 16 bytes of payload if available.
-    const sender = data.slice(3, 19);
-    const dest = data.slice(19, 35);
-    const payloadSnippet = data.slice(37, 53);
+    // We use SHA-256 of all immutable fields: version, type, sender, destination, and payload.
+    // Immutable header parts: [0..1] and [3..36]
+    const immutableHeader = new Uint8Array(1 + 1 + 16 + 16 + 2);
+    immutableHeader[0] = data[0]; // version
+    immutableHeader[1] = data[1]; // type
+    immutableHeader.set(data.slice(3, 19), 2); // sender
+    immutableHeader.set(data.slice(19, 35), 18); // destination
+    immutableHeader.set(data.slice(35, 37), 34); // payload length
 
-    // Efficiently build a hex-like string for the ID
-    return `${this.bytesToCompactId(sender)}-${this.bytesToCompactId(dest)}-${this.bytesToCompactId(payloadSnippet)}`;
+    const payload = data.slice(37);
+
+    const combined = new Uint8Array(immutableHeader.length + payload.length);
+    combined.set(immutableHeader);
+    combined.set(payload, immutableHeader.length);
+
+    const hashBuffer = await crypto.subtle.digest('SHA-256', combined);
+    const hashArray = new Uint8Array(hashBuffer);
+    return this.bytesToCompactId(hashArray);
   }
 
   private bytesToCompactId(bytes: Uint8Array): string {

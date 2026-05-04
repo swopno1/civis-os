@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import nacl from 'tweetnacl';
 import { CryptoVault } from '../../core/Crypto';
+import { Compression } from '../../core/Compression';
 import type { EncryptedPackage } from '../../core/Crypto';
 import type { ICivisModuleContext } from '../../core/ICivisModule';
 import './Vault.css';
@@ -107,7 +108,9 @@ export function Vault({ context }: VaultProps) {
       const arrayBuffer = event.target?.result as ArrayBuffer;
       const data = new Uint8Array(arrayBuffer);
 
-      const encrypted = CryptoVault.encrypt(data, vaultKeyPair.publicKey);
+      // Compress before encryption to maximize storage efficiency
+      const compressedData = await Compression.compress(data);
+      const encrypted = CryptoVault.encrypt(compressedData, vaultKeyPair.publicKey);
 
       const newVaultFile: VaultFile = {
         id: crypto.randomUUID(),
@@ -122,7 +125,7 @@ export function Vault({ context }: VaultProps) {
     reader.readAsArrayBuffer(file);
   };
 
-  const downloadFile = (vaultFile: VaultFile) => {
+  const downloadFile = async (vaultFile: VaultFile) => {
     if (!vaultKeyPair) return;
 
     const decrypted = CryptoVault.decrypt(vaultFile.encryptedPackage, vaultKeyPair.secretKey);
@@ -131,7 +134,10 @@ export function Vault({ context }: VaultProps) {
       return;
     }
 
-    const blob = new Blob([decrypted] as BlobPart[]);
+    // Decompress after decryption
+    const decompressed = await Compression.decompress(decrypted);
+
+    const blob = new Blob([decompressed] as BlobPart[]);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -147,7 +153,7 @@ export function Vault({ context }: VaultProps) {
     }
   };
 
-  const previewFile = (vaultFile: VaultFile) => {
+  const previewFile = async (vaultFile: VaultFile) => {
     if (!vaultKeyPair) return;
 
     const decrypted = CryptoVault.decrypt(vaultFile.encryptedPackage, vaultKeyPair.secretKey);
@@ -156,15 +162,18 @@ export function Vault({ context }: VaultProps) {
       return;
     }
 
+    // Decompress before previewing
+    const decompressed = await Compression.decompress(decrypted);
+
     let preview: string;
     // High-compression previewer logic:
     // For text, show first 500 chars.
     // For others, show a hex summary.
     try {
-      const text = new TextDecoder().decode(decrypted);
+      const text = new TextDecoder().decode(decompressed);
       preview = text.length > 500 ? text.substring(0, 500) + '... [TRUNCATED]' : text;
     } catch (e) {
-      preview = `Binary Data Summary: ${decrypted.length} bytes\nHex: ${CryptoVault.toHex(decrypted.slice(0, 32))}...`;
+      preview = `Binary Data Summary: ${decompressed.length} bytes\nHex: ${CryptoVault.toHex(decompressed.slice(0, 32))}...`;
     }
 
     setPreviewContent({ name: vaultFile.name, data: preview });
@@ -196,7 +205,7 @@ export function Vault({ context }: VaultProps) {
           ) : (
             files.map(file => (
               <div key={file.id} className="file-item">
-                <div className="file-info" onClick={() => previewFile(file)} style={{ cursor: 'pointer' }}>
+                <div className="file-info" onClick={async () => await previewFile(file)} style={{ cursor: 'pointer' }}>
                   <span className="file-icon">📄</span>
                   <div className="file-details">
                     <span className="file-name">{file.name}</span>
@@ -204,7 +213,7 @@ export function Vault({ context }: VaultProps) {
                   </div>
                 </div>
                 <div className="file-actions">
-                  <button onClick={() => downloadFile(file)}>Decrypt & Download</button>
+                  <button onClick={async () => await downloadFile(file)}>Decrypt & Download</button>
                   <button className="delete-btn" onClick={() => deleteFile(file.id)}>Delete</button>
                 </div>
               </div>
