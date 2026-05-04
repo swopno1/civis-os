@@ -1,0 +1,6 @@
+{
+  "id": "com.community.medkit",
+  "version": "1.2.0",
+  "author": "MedRescue",
+  "permissions": ["storage"]
+}

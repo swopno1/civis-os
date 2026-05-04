@@ -21,6 +21,17 @@ const SUPPORTED_LANGUAGES: LanguageInfo[] = [
   { code: 'es', name: 'Español' },
   { code: 'bn', name: 'বাংলা' },
   { code: 'hi', name: 'हिन्दी' },
+  { code: 'zh', name: '中文' },
+  { code: 'pt', name: 'Português' },
+  { code: 'ru', name: 'Русский' },
+  { code: 'ja', name: '日本語' },
+  { code: 'pa', name: 'ਪੰਜਾਬੀ' },
+  { code: 'mr', name: 'मराठी' },
+  { code: 'sw', name: 'Kiswahili' },
+  { code: 'am', name: 'አማርኛ' },
+  { code: 'ps', name: 'پښتو', isRTL: true },
+  { code: 'fa-AF', name: 'دری', isRTL: true },
+  { code: 'uk', name: 'Українська' },
 ];
 
 const BUNDLED_TRANSLATIONS: Record<LanguageCode, TranslationResource> = {

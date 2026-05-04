@@ -1,0 +1,6 @@
+{
+  "id": "com.community.weather",
+  "version": "1.0.0",
+  "author": "ResilienceDev",
+  "permissions": ["storage"]
+}

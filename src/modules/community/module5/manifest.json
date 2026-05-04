@@ -1,0 +1,6 @@
+{
+  "id": "com.community.trades",
+  "version": "1.1.0",
+  "author": "MarketNet",
+  "permissions": ["storage", "mesh"]
+}

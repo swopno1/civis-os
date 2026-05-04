@@ -46,7 +46,9 @@ void loop() {
   // 3. Serial-to-LoRa Bridge Logic (Traffic Neutral)
   // The firmware doesn't need to know the packet content.
   // It only needs to respect the Serial framing.
+  bool active = false;
   if (Serial.available()) {
+    active = true;
     while (Serial.available() && bufferIndex < 1024) {
       serialBuffer[bufferIndex++] = Serial.read();
 
@@ -66,5 +68,14 @@ void loop() {
         }
       }
     }
+  }
+
+  // Low-Power Optimization:
+  // If no activity is detected, we can introduce a small delay or enter light sleep.
+  // In a real-world scenario, we'd use esp_light_sleep_start() with a timer/GPIO wakeup.
+  if (!active) {
+    // Reduce CPU frequency or use light sleep for power saving
+    // setCpuFrequencyMhz(80); // Optional: lower frequency
+    delay(10); // Simple yielding to reduce power consumption of the loop
   }
 }
