@@ -28,7 +28,8 @@ export function Desktop() {
     toggleMinimize: baseToggleMinimize,
     toggleMaximize,
     focusWindow,
-    updateWindowPosition
+    updateWindowPosition,
+    updateWindowSize
   } = useWindowManager();
 
   const [meshStatus, setMeshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
@@ -303,6 +304,7 @@ export function Desktop() {
           onMaximize={toggleMaximize}
           onFocus={focusWindow}
           onMove={updateWindowPosition}
+          onResize={updateWindowSize}
         />
       </main>
 

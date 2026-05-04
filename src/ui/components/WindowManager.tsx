@@ -8,6 +8,7 @@ interface WindowManagerProps {
   onMaximize: (id: string) => void;
   onFocus: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onResize: (id: string, width: number, height: number) => void;
 }
 
 export function WindowManager({
@@ -16,7 +17,8 @@ export function WindowManager({
   onMinimize,
   onMaximize,
   onFocus,
-  onMove
+  onMove,
+  onResize
 }: WindowManagerProps) {
   // Determine which window is active (highest z-index and not minimized)
   const activeWindowId = [...windows]
@@ -34,11 +36,13 @@ export function WindowManager({
           isMaximized={win.isMaximized}
           zIndex={win.zIndex}
           position={win.position}
+          size={win.size}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
           onClose={onClose}
           onFocus={onFocus}
           onMove={onMove}
+          onResize={onResize}
         >
           {win.content}
         </Window>

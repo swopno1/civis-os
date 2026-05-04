@@ -10,30 +10,38 @@ export interface WindowProps {
   isMaximized?: boolean;
   zIndex?: number;
   position?: { x: number; y: number };
+  size?: { width: number; height: number };
   onClose: (id: string) => void;
   onMinimize: (id: string) => void;
   onMaximize?: (id: string) => void;
   onFocus: (id: string) => void;
   onMove?: (id: string, x: number, y: number) => void;
+  onResize?: (id: string, width: number, height: number) => void;
   children: ComponentChildren;
 }
 
-export function Window({
-  id,
-  title,
-  isActive,
-  isMaximized,
-  zIndex,
-  position,
-  onClose,
-  onMinimize,
-  onMaximize,
-  onFocus,
-  onMove,
-  children
-}: WindowProps) {
+export function Window(props: WindowProps) {
+  const {
+    id,
+    title,
+    isActive,
+    isMaximized,
+    zIndex,
+    position,
+    size,
+    onClose,
+    onMinimize,
+    onMaximize,
+    onFocus,
+    onMove,
+    onResize,
+    children
+  } = props;
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const initialSize = useRef({ width: 0, height: 0 });
+  const resizeStart = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: MouseEvent) => {
     onFocus(id);
@@ -46,18 +54,37 @@ export function Window({
     };
   };
 
+  const handleResizeStart = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onFocus(id);
+    if (isMaximized) return;
+
+    setIsResizing(true);
+    initialSize.current = {
+      width: size?.width || 600,
+      height: size?.height || 400
+    };
+    resizeStart.current = { x: e.clientX, y: e.clientY };
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging && onMove) {
         onMove(id, e.clientX - dragOffset.current.x, e.clientY - dragOffset.current.y);
+      } else if (isResizing && onResize) {
+        const deltaX = e.clientX - resizeStart.current.x;
+        const deltaY = e.clientY - resizeStart.current.y;
+        onResize(id, initialSize.current.width + deltaX, initialSize.current.height + deltaY);
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setIsResizing(false);
     };
 
-    if (isDragging) {
+    if (isDragging || isResizing) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     }
@@ -66,21 +93,21 @@ export function Window({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, id, onMove]);
+  }, [isDragging, isResizing, id, onMove, onResize]);
 
   const style = {
-    zIndex: zIndex || 10,
-    insetBlockStart: isMaximized ? 0 : (position?.y || '10%'),
-    insetInlineStart: isMaximized ? 0 : (position?.x || '10%'),
-    width: isMaximized ? '100%' : undefined,
-    height: isMaximized ? 'calc(100% - 48px)' : undefined,
+    zIndex: zIndex ?? 10,
+    insetBlockStart: isMaximized ? 0 : (position?.y ?? '10%'),
+    insetInlineStart: isMaximized ? 0 : (position?.x ?? '10%'),
     borderRadius: isMaximized ? '0' : undefined,
-    transition: isDragging ? 'none' : 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), z-index 0s',
+    transition: (isDragging || isResizing) ? 'none' : 'inset 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out, border-radius 0.2s ease-out, z-index 0s',
+    width: isMaximized ? '100%' : (size?.width ?? 600),
+    height: isMaximized ? 'calc(100% - 48px)' : (size?.height ?? 400),
   };
 
   return (
     <div 
-      className={`civis-window ${isActive ? 'active' : ''} ${isMaximized ? 'maximized' : ''} ${isDragging ? 'dragging' : ''}`}
+      className={`civis-window ${isActive ? 'active' : ''} ${isMaximized ? 'maximized' : ''} ${isDragging ? 'dragging' : ''} ${isResizing ? 'resizing' : ''}`}
       style={style}
       onMouseDown={() => onFocus(id)}
     >
@@ -102,6 +129,12 @@ export function Window({
       <div className="civis-window-body">
         {children || <div className="module-loading">Loading module content...</div>}
       </div>
+      {!isMaximized && (
+        <div
+          className="civis-window-resize-handle"
+          onMouseDown={handleResizeStart}
+        />
+      )}
     </div>
   );
 }
