@@ -13,11 +13,16 @@ export type CivisPermission =
   | 'hardware:usb'    // Access generic USB devices
   | 'hardware:bt';   // Access bluetooth
 
+export interface IMeshClient {
+  send: (data: Uint8Array | string, destination?: string) => Promise<void>;
+  listen: (callback: (data: Uint8Array) => void) => () => void;
+}
+
 export interface ICivisModuleContext {
   // Methods provided to the module by the OS upon initialization
   requestPermission: (permission: CivisPermission) => Promise<boolean>;
   getStorageInstance: (namespace: string) => Promise<any>; // E.g., PouchDB instance
-  getMeshClient: () => any; // E.g., Reticulum connection
+  getMeshClient: () => IMeshClient;
 
   // Hardware Bridging
   requestSerialPort: (options?: SerialPortRequestOptions) => Promise<SerialPort>;

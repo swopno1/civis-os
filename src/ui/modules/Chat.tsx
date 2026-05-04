@@ -143,7 +143,7 @@ export function Chat({ context }: ChatProps) {
         }
       };
 
-      await meshClient.send(JSON.stringify(envelope));
+      await meshClient.send(JSON.stringify(envelope), recipientKey);
 
       const myMessage: ChatMessage = {
         id: crypto.randomUUID(),

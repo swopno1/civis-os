@@ -58,7 +58,7 @@ export class DistributionService {
       version,
       author
     };
-    meshService.sendPacket(new TextEncoder().encode(JSON.stringify(packet)));
+    meshService.broadcast(new TextEncoder().encode(JSON.stringify(packet)));
   }
 
   public requestModule(moduleId: string) {
@@ -66,7 +66,7 @@ export class DistributionService {
       type: 'REQUEST_MODULE',
       moduleId
     };
-    meshService.sendPacket(new TextEncoder().encode(JSON.stringify(packet)));
+    meshService.broadcast(new TextEncoder().encode(JSON.stringify(packet)));
   }
 
   public getAvailableModules() {

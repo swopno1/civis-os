@@ -36,14 +36,35 @@ void setup() {
   Serial.println("CivisNode Ready. Awaiting Mesh initialization...");
 }
 
+// Packet Buffer for Serial Framing
+uint8_t serialBuffer[1024];
+int bufferIndex = 0;
+
 void loop() {
   server.handleClient();
 
-  // 3. Serial-to-Mesh Bridge Logic (Placeholder)
+  // 3. Serial-to-LoRa Bridge Logic (Traffic Neutral)
+  // The firmware doesn't need to know the packet content.
+  // It only needs to respect the Serial framing.
   if (Serial.available()) {
-    uint8_t incoming = Serial.read();
-    // Logic to route to LoRa/Mesh goes here
-    // For now, just echo for testing
-    Serial.write(incoming);
+    while (Serial.available() && bufferIndex < 1024) {
+      serialBuffer[bufferIndex++] = Serial.read();
+
+      // Check if we have at least the length prefix (2 bytes)
+      if (bufferIndex >= 2) {
+        uint16_t packetLen = serialBuffer[0] | (serialBuffer[1] << 8);
+
+        // Check if the full packet has arrived
+        if (bufferIndex >= 2 + packetLen) {
+          // Full packet received from Serial!
+          // ROUTE TO LORA (Placeholder)
+          // For now, echo back to Serial to simulate mesh loopback/broadcast
+          Serial.write(serialBuffer, 2 + packetLen);
+
+          // Reset buffer
+          bufferIndex = 0;
+        }
+      }
+    }
   }
 }
