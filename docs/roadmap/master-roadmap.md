@@ -26,6 +26,12 @@ This document tracks the high-level progress of CivisOS through its developmenta
     - Initial batch of 5 community-developed mock modules created for ecosystem validation (Weather, Maps, MedKit, Radio, Trades).
 - **[ ] P2P Module Distribution**: (Next Step) Scaling the `DistributionService` for wide-area mesh propagation.
 
+## Accelerated Rapid Development Milestones
+- **[Milestone 00: Traction Blitz (Weeks 1-2)](../milestones/milestone_00_traction.md)**: SMM focus and brand establishment.
+- **[Milestone 01: Community Activation (Month 1)](../milestones/milestone_01_community.md)**: SDK release and community challenges.
+- **[Milestone 02: Hardware Sovereignty (Month 2)](../milestones/milestone_02_mesh_blitz.md)**: Physical node builds and influencer partnerships.
+- **[Milestone 03: The Ecosystem (Month 3)](../milestones/milestone_03_scale.md)**: Global hackathon and decentralized store.
+
 ## Continuous Micro-Adjustments & Stability
 - **[x] Viewport Boundary Enforcement**: Windows restricted to visible workspace in `useWindowManager`.
 - **[x] Z-Index Normalization**: Automated z-index reset logic implemented to prevent overflow in long-running sessions.
