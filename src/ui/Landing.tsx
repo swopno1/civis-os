@@ -1,6 +1,8 @@
+import { useEffect } from 'preact/hooks';
 import './Landing.css';
 import { Button } from './components/Button';
 import { useTranslation } from '../core/TranslationService.ts';
+import { analytics } from '../core/Analytics.ts';
 
 interface LandingProps {
   onBootOS: () => void;
@@ -9,6 +11,12 @@ interface LandingProps {
 export function Landing({ onBootOS }: LandingProps) {
   const isOfflineReady = 'serviceWorker' in navigator && navigator.serviceWorker.controller;
   const { t, currentLang, setLanguage, supportedLanguages } = useTranslation();
+
+  useEffect(() => {
+    // Initialize privacy-first analytics only on the landing page
+    analytics.init('civisos');
+    analytics.trackPageView();
+  }, []);
 
   return (
     <div className="civis-landing">
