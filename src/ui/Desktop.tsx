@@ -4,12 +4,15 @@ import type { IRNSIdentity } from '../mesh/Identity';
 import { CivisStorage } from '../core/Storage';
 import './desktop.css';
 import { WindowManager } from './components/WindowManager';
-import { useWindowManager } from './hooks/useWindowManager.ts';
+import { useWindowManager } from './hooks/useWindowManager';
 import { moduleManager } from '../core/ModuleManager';
 import type { IPermissionRequest } from '../core/PermissionService';
 import { permissionService } from '../core/PermissionService';
 import { HelloWorldModule } from '../modules/HelloWorldModule';
 import { VaultModule } from '../modules/VaultModule';
+import { ChatModule } from '../modules/ChatModule';
+import { BulletinModule } from '../modules/BulletinModule';
+import { SenseModule } from '../modules/SenseModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
 import { meshService } from '../core/MeshService';
@@ -100,6 +103,9 @@ export function Desktop() {
       try {
         await moduleManager.registerModule(new HelloWorldModule());
         await moduleManager.registerModule(new VaultModule());
+        await moduleManager.registerModule(new ChatModule());
+        await moduleManager.registerModule(new BulletinModule());
+        await moduleManager.registerModule(new SenseModule());
       } catch (e) {
         console.warn('Module registration error:', e);
       }
@@ -225,6 +231,7 @@ export function Desktop() {
           <Button
             variant="icon"
             className="desktop-icon"
+            id="icon-helloworld"
             onClick={() => openModuleWindow('org.civisos.helloworld', 'Hello World')}
           >
             <div className="icon-placeholder">👋</div>
@@ -233,14 +240,16 @@ export function Desktop() {
           <Button
             variant="icon"
             className="desktop-icon" 
-            onClick={() => openWindow('meshchat', 'MeshChat', <div>Secure P2P Messenger Loading...</div>)}
+            id="icon-chat"
+            onClick={() => openModuleWindow('org.civisos.chat', 'CivisChat')}
           >
             <div className="icon-placeholder">💬</div>
-            <span>MeshChat</span>
+            <span>CivisChat</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
+            id="icon-vault"
             onClick={() => openModuleWindow('org.civisos.vault', 'CivisVault')}
           >
             <div className="icon-placeholder">🔒</div>
@@ -249,18 +258,20 @@ export function Desktop() {
           <Button
             variant="icon"
             className="desktop-icon" 
-            onClick={() => openWindow('board', 'LocalBoard', <div>Decentralized Bulletin Board Loading...</div>)}
+            id="icon-bulletin"
+            onClick={() => openModuleWindow('org.civisos.bulletin', 'CivisBulletin')}
           >
             <div className="icon-placeholder">📋</div>
-            <span>LocalBoard</span>
+            <span>CivisBulletin</span>
           </Button>
           <Button
             variant="icon"
             className="desktop-icon" 
-            onClick={() => openWindow('sense', 'Sense', <div>Environmental Data Loading...</div>)}
+            id="icon-sense"
+            onClick={() => openModuleWindow('org.civisos.sense', 'CivisSense')}
           >
             <div className="icon-placeholder">🌡️</div>
-            <span>Sense</span>
+            <span>CivisSense</span>
           </Button>
           <Button
             variant="icon"

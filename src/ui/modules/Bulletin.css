@@ -1,0 +1,108 @@
+.bulletin-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--civis-black, #000000);
+  color: var(--civis-green, #00ff00);
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+}
+
+.bulletin-header {
+  padding: 1rem;
+  border-bottom: 2px solid var(--civis-green, #00ff00);
+}
+
+.bulletin-header h2 {
+  margin: 0;
+  color: var(--civis-orange, #ff8c00);
+}
+
+.post-form {
+  padding: 1rem;
+  background: rgba(0, 255, 0, 0.05);
+  border-bottom: 1px solid var(--civis-green, #00ff00);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-form input, .post-form select, .post-form textarea {
+  background: transparent;
+  border: 1px solid var(--civis-green, #00ff00);
+  color: var(--civis-green, #00ff00);
+  padding: 0.5rem;
+  font-family: inherit;
+}
+
+.post-form button {
+  background: var(--civis-orange, #ff8c00);
+  color: #000;
+  border: none;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.post-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-item {
+  border: 1px solid var(--civis-green, #00ff00);
+  padding: 1rem;
+  background: rgba(0, 255, 0, 0.02);
+}
+
+.post-item.category-alert {
+  border-color: #ff0000;
+  background: rgba(255, 0, 0, 0.05);
+}
+
+.post-item.category-trade {
+  border-color: var(--civis-orange, #ff8c00);
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.post-category {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.post-item h3 {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.post-item p {
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.post-footer {
+  margin-top: 1rem;
+  font-size: 0.7rem;
+  text-align: right;
+  opacity: 0.6;
+}
+
+.empty-bulletin {
+  text-align: center;
+  padding: 3rem;
+  opacity: 0.5;
+  border: 1px dashed var(--civis-green, #00ff00);
+}

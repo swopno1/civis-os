@@ -1,0 +1,108 @@
+.sense-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--civis-black, #000000);
+  color: var(--civis-green, #00ff00);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.sense-header {
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--civis-green, #00ff00);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sense-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid;
+}
+
+.status-badge.connected { color: #00ff00; border-color: #00ff00; }
+.status-badge.simulating { color: var(--civis-orange, #ff8c00); border-color: var(--civis-orange, #ff8c00); }
+.status-badge.disconnected { color: #ff0000; border-color: #ff0000; }
+
+.connection-prompt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.connect-btn, .sim-btn {
+  background: var(--civis-green, #00ff00);
+  color: #000;
+  border: none;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  max-width: 300px;
+}
+
+.sim-btn {
+  background: transparent;
+  color: var(--civis-green, #00ff00);
+  border: 1px solid var(--civis-green, #00ff00);
+}
+
+.sensor-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.sensor-card {
+  border: 1px solid var(--civis-green, #00ff00);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 255, 0, 0.05);
+}
+
+.sensor-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.sensor-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.sensor-value small {
+  font-size: 1rem;
+}
+
+.sensor-sub {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.sense-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--civis-green, #00ff00);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}

@@ -1,12 +1,12 @@
 import { h, render } from 'preact';
 import type { ICivisModule, ICivisModuleContext, CivisPermission } from '../core/ICivisModule';
-import { Vault } from '../ui/modules/Vault';
+import { Bulletin } from '../ui/modules/Bulletin';
 
-export class VaultModule implements ICivisModule {
-  public id = 'org.civisos.vault';
-  public name = 'CivisVault';
-  public icon = '🔒';
-  public permissions: CivisPermission[] = ['storage:read', 'storage:write'];
+export class BulletinModule implements ICivisModule {
+  public id = 'org.civisos.bulletin';
+  public name = 'CivisBulletin';
+  public icon = '📋';
+  public permissions: CivisPermission[] = ['mesh:read', 'mesh:write', 'storage:read', 'storage:write'];
 
   private context?: ICivisModuleContext;
   private container?: HTMLElement;
@@ -19,7 +19,7 @@ export class VaultModule implements ICivisModule {
   public mount(container: HTMLElement): void {
     this.container = container;
     if (this.context) {
-      render(h(Vault, { context: this.context }), container);
+      render(h(Bulletin, { context: this.context }), container);
     }
     console.log(`${this.name} module mounted`);
   }
