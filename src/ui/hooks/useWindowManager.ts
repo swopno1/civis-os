@@ -16,7 +16,6 @@ export interface WindowState {
 
 export function useWindowManager() {
   const [windows, setWindows] = useState<WindowState[]>([]);
-  const [maxZIndex, setMaxZIndex] = useState(10);
 
   const openWindow = useCallback((id: string, title: string, content: ComponentChildren, isModule: boolean = false) => {
     setWindows(prev => {
@@ -28,34 +27,45 @@ export function useWindowManager() {
           .filter(w => w.id !== id)
           .sort((a, b) => a.zIndex - b.zIndex);
 
-        const newWindows = otherWindows.map((w, index) => ({
+        let newWindows = otherWindows.map((w, index) => ({
           ...w,
           zIndex: 10 + index
         }));
+
+        let newZ = 10 + otherWindows.length;
+
+        // Z-Index Normalization: Reset if too high
+        if (newZ > 1000) {
+          newWindows = newWindows.map((w, i) => ({ ...w, zIndex: 10 + i }));
+          newZ = 10 + newWindows.length;
+        }
 
         const updatedWindow = {
           ...existing,
           isMinimized: false,
           isOpen: true,
-          zIndex: 10 + otherWindows.length,
+          zIndex: newZ,
           content
         };
-
-        const maxZ = 10 + otherWindows.length;
-        setMaxZIndex(maxZ);
 
         return [...newWindows, updatedWindow];
       }
 
       // Normalize existing z-indices
-      const normalizedPrev = prev
+      let normalizedPrev = prev
         .sort((a, b) => a.zIndex - b.zIndex)
         .map((w, index) => ({
           ...w,
           zIndex: 10 + index
         }));
 
-      const newZ = 10 + normalizedPrev.length;
+      let newZ = 10 + normalizedPrev.length;
+
+      // Z-Index Normalization: Reset if too high
+      if (newZ > 1000) {
+        normalizedPrev = normalizedPrev.map((w, i) => ({ ...w, zIndex: 10 + i }));
+        newZ = 10 + normalizedPrev.length;
+      }
       const newWindow: WindowState = {
         id,
         title,
@@ -69,7 +79,6 @@ export function useWindowManager() {
         isModule,
       };
 
-      setMaxZIndex(newZ);
       return [...normalizedPrev, newWindow];
     });
   }, []);
@@ -96,20 +105,26 @@ export function useWindowManager() {
         .filter(w => w.id !== id)
         .sort((a, b) => a.zIndex - b.zIndex);
 
-      const newWindows = otherWindows.map((w, index) => ({
+      let newWindows = otherWindows.map((w, index) => ({
         ...w,
         zIndex: 10 + index
       }));
 
+      let newZ = 10 + otherWindows.length;
+
+      // Z-Index Normalization: Reset if too high
+      if (newZ > 1000) {
+        newWindows = newWindows.map((w, i) => ({ ...w, zIndex: 10 + i }));
+        newZ = 10 + newWindows.length;
+      }
+
       const focusedWindow = {
         ...win,
         isMinimized: false,
-        zIndex: 10 + otherWindows.length
+        zIndex: newZ
       };
 
       const finalWindows = [...newWindows, focusedWindow];
-      const maxZ = 10 + otherWindows.length;
-      setMaxZIndex(maxZ);
 
       return finalWindows;
     });
@@ -122,10 +137,9 @@ export function useWindowManager() {
       // Boundary Enforcement
       const taskbarHeight = 48;
       const headerHeight = 44;
-      const minVisible = 100;
 
-      const maxX = window.innerWidth - minVisible;
-      const minX = -(w.size?.width ?? 600) + minVisible;
+      const maxX = window.innerWidth - 100;
+      const minX = 0;
       const maxY = window.innerHeight - taskbarHeight - headerHeight;
       const minY = 0;
 
@@ -144,8 +158,9 @@ export function useWindowManager() {
       const minWidth = 200;
       const minHeight = 150;
 
-      const maxWidth = window.innerWidth;
-      const maxHeight = window.innerHeight - taskbarHeight;
+      // Bound size to viewport
+      const maxWidth = window.innerWidth - (w.position?.x ?? 0);
+      const maxHeight = window.innerHeight - taskbarHeight - (w.position?.y ?? 0);
 
       const boundedWidth = Math.max(minWidth, Math.min(width, maxWidth));
       const boundedHeight = Math.max(minHeight, Math.min(height, maxHeight));
@@ -156,8 +171,6 @@ export function useWindowManager() {
 
   const hydrateWindows = useCallback((savedWindows: WindowState[]) => {
     setWindows(savedWindows);
-    const maxZ = savedWindows.reduce((max, w) => Math.max(max, w.zIndex), 10);
-    setMaxZIndex(maxZ);
   }, []);
 
   return {

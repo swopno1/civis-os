@@ -100,7 +100,7 @@ export function Window(props: WindowProps) {
     insetBlockStart: isMaximized ? 0 : (position?.y ?? '10%'),
     insetInlineStart: isMaximized ? 0 : (position?.x ?? '10%'),
     borderRadius: isMaximized ? '0' : undefined,
-    transition: (isDragging || isResizing) ? 'none' : 'inset 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out, border-radius 0.2s ease-out, z-index 0s',
+    transition: (isDragging || isResizing) ? 'none' : 'inset-block-start 0.2s ease-out, inset-inline-start 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out, border-radius 0.2s ease-out, z-index 0s',
     width: isMaximized ? '100%' : (size?.width ?? 600),
     height: isMaximized ? 'calc(100% - 48px)' : (size?.height ?? 400),
   };

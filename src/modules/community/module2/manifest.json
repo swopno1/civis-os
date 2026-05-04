@@ -1,0 +1,6 @@
+{
+  "id": "com.community.maps",
+  "version": "0.9.5",
+  "author": "GlobalMapper",
+  "permissions": ["storage", "mesh"]
+}

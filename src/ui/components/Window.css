@@ -1,5 +1,6 @@
 .civis-window {
   position: absolute;
+  will-change: inset, width, height, border-radius;
   width: 600px;
   height: 400px;
   background: #000;
