@@ -50,6 +50,7 @@ export class HardwareBridge {
     try {
       while (this.port.readable) {
         this.reader = this.port.readable.getReader();
+        let buffer = new Uint8Array(0);
         try {
           while (true) {
             const { value, done } = await this.reader.read();
@@ -58,7 +59,25 @@ export class HardwareBridge {
               break;
             }
             if (value) {
-              this.handleIncomingData(value);
+              // Accumulate data in buffer
+              const newBuffer = new Uint8Array(buffer.length + value.length);
+              newBuffer.set(buffer);
+              newBuffer.set(value, buffer.length);
+              buffer = newBuffer;
+
+              // Process all complete frames in the buffer
+              // Frame format: [Length LSB] [Length MSB] [Data...]
+              while (buffer.length >= 2) {
+                const length = buffer[0] | (buffer[1] << 8);
+                if (buffer.length >= 2 + length) {
+                  const packet = buffer.slice(2, 2 + length);
+                  this.handleIncomingData(packet);
+                  buffer = buffer.slice(2 + length);
+                } else {
+                  // Incomplete frame, wait for more data
+                  break;
+                }
+              }
             }
           }
         } catch (error) {
@@ -76,8 +95,7 @@ export class HardwareBridge {
    * Process binary data received from the hardware
    */
   private handleIncomingData(data: Uint8Array) {
-    // In a real implementation, this would parse Reticulum protocol frames
-    console.log(`[HardwareBridge] Received ${data.length} bytes from radio.`);
+    console.log(`[HardwareBridge] Received complete framed packet: ${data.length} bytes.`);
     this.onDataReceived(data);
   }
 
@@ -89,10 +107,16 @@ export class HardwareBridge {
       throw new Error('Serial port not connected or not writable.');
     }
 
+    // Add 2-byte length prefix for framing
+    const framed = new Uint8Array(2 + data.length);
+    framed[0] = data.length & 0xff;
+    framed[1] = (data.length >> 8) & 0xff;
+    framed.set(data, 2);
+
     this.writer = this.port.writable.getWriter();
     try {
-      await this.writer.write(data);
-      console.log(`[HardwareBridge] Sent ${data.length} bytes to radio.`);
+      await this.writer.write(framed);
+      console.log(`[HardwareBridge] Sent ${data.length} bytes (framed) to radio.`);
     } catch (error) {
       console.error('[HardwareBridge] Write error:', error);
     } finally {

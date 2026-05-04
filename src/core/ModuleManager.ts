@@ -142,10 +142,14 @@ export class ModuleManager {
           throw new Error(`Module ${moduleId} does not have mesh permissions.`);
         }
         return {
-          send: async (data: any) => {
+          send: async (data: any, destination?: string) => {
             if (!hasWrite) throw new Error(`Permission mesh:write denied for module ${moduleId}`);
             const payload = typeof data === 'string' ? new TextEncoder().encode(data) : data;
-            await meshService.sendPacket(payload);
+            if (destination) {
+              await meshService.sendPacket(destination, payload);
+            } else {
+              await meshService.broadcast(payload);
+            }
             console.log(`[${moduleId}] Mesh packet sent`);
           },
           listen: (callback: (data: any) => void) => {

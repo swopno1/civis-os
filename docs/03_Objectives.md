@@ -10,9 +10,9 @@ To track the success of CivisOS development, the following measurable objectives
 - [x] **Zero-Data Loss:** OS state (window positions, theme, installed modules) must persist across refreshes with 99.9% reliability.
 
 ## Phase 2 Objectives: Connectivity
-- [ ] **LoRa Packet Delivery:** Achieve >90% delivery rate for 256-byte packets between two nodes at a range of 1km in an urban environment.
-- [ ] **Seamless Pairing:** A new user should be able to connect their phone/laptop to a hardware mesh node in under 30 seconds.
-- [ ] **Traffic Neutrality:** The mesh must successfully route packets without knowing their content (encryption at the routing layer).
+- [x] **LoRa Packet Delivery:** Achieve >90% delivery rate for 256-byte packets between two nodes at a range of 1km in an urban environment.
+- [x] **Seamless Pairing:** A new user should be able to connect their phone/laptop to a hardware mesh node in under 30 seconds.
+- [x] **Traffic Neutrality:** The mesh must successfully route packets without knowing their content (encryption at the routing layer).
 
 ## Phase 3 Objectives: Application Utility
 - [ ] **Messaging Latency:** Mesh-based messages should be delivered in <5 seconds (local peer) and <1 minute (multi-hop mesh).

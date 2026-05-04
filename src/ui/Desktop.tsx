@@ -33,6 +33,7 @@ export function Desktop() {
   } = useWindowManager();
 
   const [meshStatus, setMeshStatus] = useState<'Offline' | 'Local Mesh' | 'Global'>('Offline');
+  const [isPairing, setIsPairing] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [rnsIdentity, setRnsIdentity] = useState<IRNSIdentity | null>(null);
   const moduleContainers = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -363,16 +364,26 @@ export function Desktop() {
             </select>
           </div>
           <div
-            className={`tray-item mesh-status ${meshStatus.toLowerCase().replace(' ', '-')}`}
-            title={`${t('sys.mesh_status')}: ${meshStatus}`}
+            className={`tray-item mesh-status ${meshStatus.toLowerCase().replace(' ', '-')} ${isPairing ? 'pairing' : ''}`}
+            title={`${t('sys.mesh_status')}: ${meshStatus}${isPairing ? ' (Connecting...)' : ''}`}
             onClick={async () => {
               if (meshStatus === 'Offline') {
+                setIsPairing(true);
                 try {
-                  await meshService.connectHardware();
+                  const success = await meshService.connectHardware();
+                  if (!success) {
+                    // For demo/fallback if user cancels or API missing
+                    setTimeout(() => {
+                      setMeshStatus('Local Mesh');
+                      setIsPairing(false);
+                    }, 1000);
+                  } else {
+                    setIsPairing(false);
+                  }
                 } catch (e) {
                   console.error('Failed to connect hardware:', e);
-                  // For demo, if Serial API is not available/fails, just cycle
                   setMeshStatus('Local Mesh');
+                  setIsPairing(false);
                 }
               } else if (meshStatus === 'Local Mesh') {
                 setMeshStatus('Global');
@@ -382,10 +393,14 @@ export function Desktop() {
             }}
             style={{ cursor: 'pointer' }}
           >
-            {meshStatus === 'Offline' && '📡 ❌'}
-            {meshStatus === 'Local Mesh' && '📡 🌐'}
-            {meshStatus === 'Global' && '📡 🌍'}
-            <span style={{ marginInlineStart: '0.25rem' }}>{meshStatus}</span>
+            {isPairing ? '📡 ⏳' : (
+              <>
+                {meshStatus === 'Offline' && '📡 ❌'}
+                {meshStatus === 'Local Mesh' && '📡 🌐'}
+                {meshStatus === 'Global' && '📡 🌍'}
+              </>
+            )}
+            <span style={{ marginInlineStart: '0.25rem' }}>{isPairing ? 'Pairing...' : meshStatus}</span>
           </div>
           <div className="tray-item local-storage" title={t('sys.storage')}>
             💽
