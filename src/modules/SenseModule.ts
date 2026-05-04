@@ -5,6 +5,8 @@ import { Sense } from '../ui/modules/Sense';
 export class SenseModule implements ICivisModule {
   public id = 'org.civisos.sense';
   public name = 'CivisSense';
+  public version = '1.0.0';
+  public author = 'CivisOS Core';
   public icon = '🌡️';
   public permissions: CivisPermission[] = ['hardware:serial'];
 

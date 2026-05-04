@@ -2,6 +2,7 @@ import { render } from 'preact'
 import { useState, useEffect } from 'preact/hooks'
 import { Landing } from './ui/Landing'
 import { Desktop } from './ui/Desktop'
+import { translationService } from './core/TranslationService.ts'
 import './ui/desktop.css'
 
 function App() {
@@ -9,8 +10,15 @@ function App() {
     const hash = window.location.hash;
     return (hash === '#os' || hash === '#landing') ? hash : '#landing';
   })
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    const init = async () => {
+      await translationService.init();
+      setIsInitialized(true);
+    };
+    init();
+
     const handleHashChange = () => {
       const hash = window.location.hash;
       if (hash && hash !== '#os' && hash !== '#landing') {
@@ -26,6 +34,8 @@ function App() {
   const bootOS = () => {
     window.location.hash = '#os'
   }
+
+  if (!isInitialized) return null;
 
   return route === '#os' ? <Desktop /> : <Landing onBootOS={bootOS} />
 }

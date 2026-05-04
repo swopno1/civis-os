@@ -146,6 +146,23 @@ body, html {
   border-color: #333;
 }
 
+.lang-select {
+  background: transparent;
+  color: var(--os-primary, #00ff00);
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.lang-select option {
+  background: #000;
+  color: var(--os-primary, #00ff00);
+}
+
 .mesh-status.offline { color: var(--os-urgent); }
 .mesh-status.local-mesh { color: var(--os-primary); }
 .mesh-status.global { color: #00ffff; }

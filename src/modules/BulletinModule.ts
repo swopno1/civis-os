@@ -5,6 +5,8 @@ import { Bulletin } from '../ui/modules/Bulletin';
 export class BulletinModule implements ICivisModule {
   public id = 'org.civisos.bulletin';
   public name = 'CivisBulletin';
+  public version = '1.0.0';
+  public author = 'CivisOS Core';
   public icon = '📋';
   public permissions: CivisPermission[] = ['mesh:read', 'mesh:write', 'storage:read', 'storage:write'];
 

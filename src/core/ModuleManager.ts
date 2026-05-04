@@ -1,6 +1,7 @@
 import type { ICivisModule, ICivisModuleContext, CivisPermission } from './ICivisModule';
 import { CivisStorage } from './Storage';
 import { meshService } from './MeshService';
+import { translationService } from './TranslationService.ts';
 
 export type PermissionHandler = (moduleId: string, permission: CivisPermission) => Promise<boolean>;
 
@@ -29,6 +30,13 @@ export class ModuleManager {
 
     this.modules.set(module.id, module);
     this.grantedPermissions.set(module.id, new Set());
+
+    // Register module translations if any
+    if (module.translations) {
+      Object.entries(module.translations).forEach(([lang, res]) => {
+        translationService.addTranslation(lang, res);
+      });
+    }
 
     const context = this.createModuleContext(module.id);
     this.contexts.set(module.id, context);

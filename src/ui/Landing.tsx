@@ -1,5 +1,6 @@
 import './Landing.css';
 import { Button } from './components/Button';
+import { useTranslation } from '../core/TranslationService.ts';
 
 interface LandingProps {
   onBootOS: () => void;
@@ -7,43 +8,54 @@ interface LandingProps {
 
 export function Landing({ onBootOS }: LandingProps) {
   const isOfflineReady = 'serviceWorker' in navigator && navigator.serviceWorker.controller;
+  const { t, currentLang, setLanguage, supportedLanguages } = useTranslation();
 
   return (
     <div className="civis-landing">
       <div className="landing-container">
         <header className="landing-header">
+          <div className="language-selector-top">
+            {supportedLanguages.map(lang => (
+              <button
+                key={lang.code}
+                className={`lang-btn ${currentLang === lang.code ? 'active' : ''}`}
+                onClick={() => setLanguage(lang.code)}
+              >
+                {lang.name}
+              </button>
+            ))}
+          </div>
           <div className="logo-placeholder">🌍</div>
-          <h1>CivisOS</h1>
-          <h2>Your Digital Lifeboat</h2>
-          <p className="subtitle">The Resilience Operating System</p>
+          <h1>{t('app.title')}</h1>
+          <h2>{t('app.tagline')}</h2>
+          <p className="subtitle">{t('app.subtitle')}</p>
         </header>
 
         <section className="landing-content">
           <p className="mission-statement">
-            CivisOS is a decentralized "Digital Lifeboat" designed to function when traditional infrastructure fails.
-            In an era of unprecedented global uncertainty, we provide the tools to organize, communicate, and survive during severe crises—independent of corporate or nation-state control.
+            {t('landing.mission')}
           </p>
 
           <div className="pillars-grid">
             <div className="pillar-item">
               <span className="pillar-icon">🛡️</span>
-              <h3>Neutrality</h3>
-              <p>Politically neutral and independent of nation-state or corporate control.</p>
+              <h3>{t('pillar.neutrality.title')}</h3>
+              <p>{t('pillar.neutrality.desc')}</p>
             </div>
             <div className="pillar-item">
               <span className="pillar-icon">📡</span>
-              <h3>Offline-First</h3>
-              <p>Built to function fully offline, syncing via local mesh networks.</p>
+              <h3>{t('pillar.offline.title')}</h3>
+              <p>{t('pillar.offline.desc')}</p>
             </div>
             <div className="pillar-item">
               <span className="pillar-icon">💻</span>
-              <h3>Agnostic</h3>
-              <p>Runs on smartphones, old laptops, Raspberry Pis, and IoT devices.</p>
+              <h3>{t('pillar.agnostic.title')}</h3>
+              <p>{t('pillar.agnostic.desc')}</p>
             </div>
             <div className="pillar-item">
               <span className="pillar-icon">🔍</span>
-              <h3>Verifiable</h3>
-              <p>Fully open-source and transparent to ensure complete global trust.</p>
+              <h3>{t('pillar.verifiable.title')}</h3>
+              <p>{t('pillar.verifiable.desc')}</p>
             </div>
           </div>
 
@@ -52,8 +64,8 @@ export function Landing({ onBootOS }: LandingProps) {
             <div className={`status-indicator ${isOfflineReady ? 'ready' : 'pending'}`}>
               <span className="dot"></span>
               {isOfflineReady
-                ? "Offline Core Cached & Ready"
-                : "Caching Offline Core..."}
+                ? t('status.ready')
+                : t('status.pending')}
             </div>
             <p className="status-detail">
               Once cached, CivisOS can be booted locally without an internet connection.
@@ -62,7 +74,7 @@ export function Landing({ onBootOS }: LandingProps) {
 
           <div className="action-panel">
             <Button variant="primary" onClick={onBootOS} className="boot-btn" style={{ padding: '1rem 2rem', fontSize: '1.2rem' }}>
-              Boot CivisOS Desktop
+              {t('landing.boot')}
             </Button>
             <div className="repo-links">
               <a href="https://github.com/swopno1/civis-os" target="_blank" rel="noopener noreferrer" className="repo-link">

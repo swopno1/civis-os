@@ -3,6 +3,8 @@ import type { ICivisModule, ICivisModuleContext, CivisPermission } from '../core
 export class HelloWorldModule implements ICivisModule {
   public id = 'org.civisos.helloworld';
   public name = 'Hello World';
+  public version = '1.0.0';
+  public author = 'CivisOS Core';
   public icon = '👋';
   public permissions: CivisPermission[] = ['storage:read', 'storage:write', 'hardware:serial', 'mesh:read', 'mesh:write'];
 
