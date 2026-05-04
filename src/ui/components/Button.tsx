@@ -6,6 +6,7 @@ interface ButtonProps {
   onClick?: (e: MouseEvent) => void;
   variant?: 'primary' | 'secondary' | 'danger' | 'icon';
   size?: 'small' | 'medium' | 'large';
+  id?: string;
   className?: string;
   title?: string;
   disabled?: boolean;
@@ -18,6 +19,7 @@ export function Button({
   onClick,
   variant = 'secondary',
   size = 'medium',
+  id,
   className = '', 
   title,
   disabled = false,
@@ -26,6 +28,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      id={id}
       type={type}
       className={`civis-btn civis-btn-${variant} civis-btn-${size} ${className}`}
       onClick={onClick}

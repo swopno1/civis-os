@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import nacl from 'tweetnacl';
-import { CryptoVault } from '../../core/Crypto.ts';
-import type { EncryptedPackage } from '../../core/Crypto.ts';
-import type { ICivisModuleContext } from '../../core/ICivisModule.ts';
+import { CryptoVault } from '../../core/Crypto';
+import type { EncryptedPackage } from '../../core/Crypto';
+import type { ICivisModuleContext } from '../../core/ICivisModule';
 import './Vault.css';
 
 interface VaultFile {
@@ -21,6 +21,7 @@ export function Vault({ context }: VaultProps) {
   const [vaultKeyPair, setVaultKeyPair] = useState<nacl.BoxKeyPair | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [storage, setStorage] = useState<any>(null);
+  const [previewContent, setPreviewContent] = useState<{ name: string, data: string | null } | null>(null);
 
   // Initialize storage and load keys/files
   useEffect(() => {
@@ -141,6 +142,32 @@ export function Vault({ context }: VaultProps) {
 
   const deleteFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
+    if (previewContent && files.find(f => f.id === id)?.name === previewContent.name) {
+      setPreviewContent(null);
+    }
+  };
+
+  const previewFile = (vaultFile: VaultFile) => {
+    if (!vaultKeyPair) return;
+
+    const decrypted = CryptoVault.decrypt(vaultFile.encryptedPackage, vaultKeyPair.secretKey);
+    if (!decrypted) {
+      alert("Failed to decrypt file for preview.");
+      return;
+    }
+
+    let preview: string;
+    // High-compression previewer logic:
+    // For text, show first 500 chars.
+    // For others, show a hex summary.
+    try {
+      const text = new TextDecoder().decode(decrypted);
+      preview = text.length > 500 ? text.substring(0, 500) + '... [TRUNCATED]' : text;
+    } catch (e) {
+      preview = `Binary Data Summary: ${decrypted.length} bytes\nHex: ${CryptoVault.toHex(decrypted.slice(0, 32))}...`;
+    }
+
+    setPreviewContent({ name: vaultFile.name, data: preview });
   };
 
   if (!isInitialized) {
@@ -160,27 +187,41 @@ export function Vault({ context }: VaultProps) {
         </div>
       </header>
 
-      <div className="file-list">
-        {files.length === 0 ? (
-          <div className="empty-vault">
-            <p>Your vault is empty. Securely store sensitive documents here.</p>
-          </div>
-        ) : (
-          files.map(file => (
-            <div key={file.id} className="file-item">
-              <div className="file-info">
-                <span className="file-icon">📄</span>
-                <div className="file-details">
-                  <span className="file-name">{file.name}</span>
-                  <span className="file-date">{new Date(file.timestamp).toLocaleString()}</span>
+      <div className="vault-content">
+        <div className="file-list">
+          {files.length === 0 ? (
+            <div className="empty-vault">
+              <p>Your vault is empty. Securely store sensitive documents here.</p>
+            </div>
+          ) : (
+            files.map(file => (
+              <div key={file.id} className="file-item">
+                <div className="file-info" onClick={() => previewFile(file)} style={{ cursor: 'pointer' }}>
+                  <span className="file-icon">📄</span>
+                  <div className="file-details">
+                    <span className="file-name">{file.name}</span>
+                    <span className="file-date">{new Date(file.timestamp).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="file-actions">
+                  <button onClick={() => downloadFile(file)}>Decrypt & Download</button>
+                  <button className="delete-btn" onClick={() => deleteFile(file.id)}>Delete</button>
                 </div>
               </div>
-              <div className="file-actions">
-                <button onClick={() => downloadFile(file)}>Decrypt & Download</button>
-                <button className="delete-btn" onClick={() => deleteFile(file.id)}>Delete</button>
-              </div>
-            </div>
-          ))
+            ))
+          )}
+        </div>
+
+        {previewContent && (
+          <div className="preview-pane">
+            <header className="preview-header">
+              <h3>Preview: {previewContent.name}</h3>
+              <button onClick={() => setPreviewContent(null)}>Close</button>
+            </header>
+            <pre className="preview-body">
+              {previewContent.data}
+            </pre>
+          </div>
         )}
       </div>
     </div>
