@@ -57,3 +57,18 @@
   color: var(--os-text, #fff);
   background: #000;
 }
+
+.civis-window-resize-handle {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--os-primary, #00ff00) 50%);
+  z-index: 20;
+}
+
+.civis-window.maximized .civis-window-resize-handle {
+  display: none;
+}

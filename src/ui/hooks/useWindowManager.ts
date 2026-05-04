@@ -21,19 +21,41 @@ export function useWindowManager() {
   const openWindow = useCallback((id: string, title: string, content: ComponentChildren, isModule: boolean = false) => {
     setWindows(prev => {
       const existing = prev.find(w => w.id === id);
-      const newZ = maxZIndex + 1;
-      setMaxZIndex(newZ);
 
       if (existing) {
-        return prev.map(w => w.id === id ? {
+        // Use focus logic for existing window
+        const otherWindows = prev
+          .filter(w => w.id !== id)
+          .sort((a, b) => a.zIndex - b.zIndex);
+
+        const newWindows = otherWindows.map((w, index) => ({
           ...w,
+          zIndex: 10 + index
+        }));
+
+        const updatedWindow = {
+          ...existing,
           isMinimized: false,
           isOpen: true,
-          zIndex: newZ,
+          zIndex: 10 + otherWindows.length,
           content
-        } : w);
+        };
+
+        const maxZ = 10 + otherWindows.length;
+        setMaxZIndex(maxZ);
+
+        return [...newWindows, updatedWindow];
       }
 
+      // Normalize existing z-indices
+      const normalizedPrev = prev
+        .sort((a, b) => a.zIndex - b.zIndex)
+        .map((w, index) => ({
+          ...w,
+          zIndex: 10 + index
+        }));
+
+      const newZ = 10 + normalizedPrev.length;
       const newWindow: WindowState = {
         id,
         title,
@@ -46,9 +68,11 @@ export function useWindowManager() {
         content,
         isModule,
       };
-      return [...prev, newWindow];
+
+      setMaxZIndex(newZ);
+      return [...normalizedPrev, newWindow];
     });
-  }, [maxZIndex]);
+  }, []);
 
   const closeWindow = useCallback((id: string) => {
     setWindows(prev => prev.filter(w => w.id !== id));
@@ -65,16 +89,69 @@ export function useWindowManager() {
   const focusWindow = useCallback((id: string) => {
     setWindows(prev => {
       const win = prev.find(w => w.id === id);
-      if (!win || (win.zIndex === maxZIndex && !win.isMinimized)) return prev;
+      if (!win) return prev;
 
-      const newZ = maxZIndex + 1;
-      setMaxZIndex(newZ);
-      return prev.map(w => w.id === id ? { ...w, zIndex: newZ, isMinimized: false } : w);
+      // Bring to front and normalize z-indices
+      const otherWindows = prev
+        .filter(w => w.id !== id)
+        .sort((a, b) => a.zIndex - b.zIndex);
+
+      const newWindows = otherWindows.map((w, index) => ({
+        ...w,
+        zIndex: 10 + index
+      }));
+
+      const focusedWindow = {
+        ...win,
+        isMinimized: false,
+        zIndex: 10 + otherWindows.length
+      };
+
+      const finalWindows = [...newWindows, focusedWindow];
+      const maxZ = 10 + otherWindows.length;
+      setMaxZIndex(maxZ);
+
+      return finalWindows;
     });
-  }, [maxZIndex]);
+  }, []);
 
   const updateWindowPosition = useCallback((id: string, x: number, y: number) => {
-    setWindows(prev => prev.map(w => w.id === id ? { ...w, position: { x, y } } : w));
+    setWindows(prev => prev.map(w => {
+      if (w.id !== id) return w;
+
+      // Boundary Enforcement
+      const taskbarHeight = 48;
+      const headerHeight = 44;
+      const minVisible = 100;
+
+      const maxX = window.innerWidth - minVisible;
+      const minX = -(w.size?.width ?? 600) + minVisible;
+      const maxY = window.innerHeight - taskbarHeight - headerHeight;
+      const minY = 0;
+
+      const boundedX = Math.max(minX, Math.min(x, maxX));
+      const boundedY = Math.max(minY, Math.min(y, maxY));
+
+      return { ...w, position: { x: boundedX, y: boundedY } };
+    }));
+  }, []);
+
+  const updateWindowSize = useCallback((id: string, width: number, height: number) => {
+    setWindows(prev => prev.map(w => {
+      if (w.id !== id) return w;
+
+      const taskbarHeight = 48;
+      const minWidth = 200;
+      const minHeight = 150;
+
+      const maxWidth = window.innerWidth;
+      const maxHeight = window.innerHeight - taskbarHeight;
+
+      const boundedWidth = Math.max(minWidth, Math.min(width, maxWidth));
+      const boundedHeight = Math.max(minHeight, Math.min(height, maxHeight));
+
+      return { ...w, size: { width: boundedWidth, height: boundedHeight } };
+    }));
   }, []);
 
   const hydrateWindows = useCallback((savedWindows: WindowState[]) => {
@@ -93,5 +170,6 @@ export function useWindowManager() {
     toggleMaximize,
     focusWindow,
     updateWindowPosition,
+    updateWindowSize,
   };
 }
