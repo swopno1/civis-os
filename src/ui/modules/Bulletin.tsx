@@ -51,22 +51,71 @@ export function Bulletin({ context }: BulletinProps) {
   }, [context]);
 
   useEffect(() => {
+    if (isInitialized && storage) {
+      storage.put('civisos_bulletin_posts', posts);
+    }
+  }, [posts, isInitialized, storage]);
+
+  // Inventory Sync Mechanism
+  useEffect(() => {
     if (!isInitialized || !meshClient) return;
 
-    const unlisten = meshClient.listen((packet: Uint8Array) => {
+    const syncInterval = setInterval(async () => {
+      // Periodic broadcast of known post IDs (Inventory)
+      const inventory = {
+        module: 'bulletin',
+        type: 'inventory',
+        ids: Array.from(seenPostIds)
+      };
+      await meshClient.send(JSON.stringify(inventory));
+    }, 120000); // Every 2 minutes
+
+    return () => clearInterval(syncInterval);
+  }, [isInitialized, meshClient, seenPostIds]);
+
+  useEffect(() => {
+    if (!isInitialized || !meshClient) return;
+
+    const unlisten = meshClient.listen(async (packet: Uint8Array) => {
       try {
         const rawStr = new TextDecoder().decode(packet);
         const envelope = JSON.parse(rawStr);
 
-        if (envelope.module === 'bulletin' && envelope.post) {
-          const post: BulletinPost = envelope.post;
+        if (envelope.module === 'bulletin') {
+          if (envelope.type === 'inventory') {
+            // Compare peer's inventory with ours
+            const peerIds = envelope.ids as string[];
+            const missingIds = peerIds.filter(id => !seenPostIds.has(id));
 
-          if (!seenPostIds.has(post.id)) {
-            setPosts(prev => [post, ...prev]);
-            setSeenPostIds(prev => new Set(prev).add(post.id));
+            for (const id of missingIds) {
+              // Request missing post
+              const request = {
+                module: 'bulletin',
+                type: 'request',
+                id
+              };
+              await meshClient.send(JSON.stringify(request));
+            }
+          } else if (envelope.type === 'request') {
+            // Peer requested a post
+            const requestedPost = posts.find(p => p.id === envelope.id);
+            if (requestedPost) {
+              const response = {
+                module: 'bulletin',
+                post: requestedPost
+              };
+              await meshClient.send(JSON.stringify(response));
+            }
+          } else if (envelope.post) {
+            const post: BulletinPost = envelope.post;
 
-            // Gossip: rebroadcast unknown posts
-            meshClient.send(rawStr);
+            if (!seenPostIds.has(post.id)) {
+              setPosts(prev => [post, ...prev]);
+              setSeenPostIds(prev => new Set(prev).add(post.id));
+
+              // Gossip: rebroadcast unknown posts
+              meshClient.send(rawStr);
+            }
           }
         }
       } catch (e) {
@@ -75,13 +124,7 @@ export function Bulletin({ context }: BulletinProps) {
     });
 
     return () => unlisten();
-  }, [isInitialized, meshClient, seenPostIds]);
-
-  useEffect(() => {
-    if (isInitialized && storage) {
-      storage.put('civisos_bulletin_posts', posts);
-    }
-  }, [posts, isInitialized, storage]);
+  }, [isInitialized, meshClient, seenPostIds, posts]);
 
   const createPost = async () => {
     if (!newPost.title || !newPost.content || !meshClient) return;

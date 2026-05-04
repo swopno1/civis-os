@@ -52,9 +52,9 @@ export class MeshService {
       this.status = 'Local Mesh';
       this.onStatusChange(this.status);
 
-      this.bridge.setOnDataReceived((data: Uint8Array) => {
+      this.bridge.setOnDataReceived(async (data: Uint8Array) => {
         console.log(`[MeshService] Data received from bridge: ${data.length} bytes`);
-        this.router.handleRawData(data);
+        await this.router.handleRawData(data);
       });
     }
     return success;

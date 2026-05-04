@@ -8,12 +8,12 @@ export class HardwareBridge {
   private port: SerialPort | null = null;
   private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
-  private onDataReceived: (data: Uint8Array) => void = () => {};
+  private onDataReceived: (data: Uint8Array) => Promise<void> = async () => {};
 
   /**
    * Set a callback for incoming data
    */
-  public setOnDataReceived(callback: (data: Uint8Array) => void) {
+  public setOnDataReceived(callback: (data: Uint8Array) => Promise<void>) {
     this.onDataReceived = callback;
   }
 
@@ -71,7 +71,7 @@ export class HardwareBridge {
                 const length = buffer[0] | (buffer[1] << 8);
                 if (buffer.length >= 2 + length) {
                   const packet = buffer.slice(2, 2 + length);
-                  this.handleIncomingData(packet);
+                  await this.handleIncomingData(packet);
                   buffer = buffer.slice(2 + length);
                 } else {
                   // Incomplete frame, wait for more data
@@ -94,9 +94,9 @@ export class HardwareBridge {
   /**
    * Process binary data received from the hardware
    */
-  private handleIncomingData(data: Uint8Array) {
+  private async handleIncomingData(data: Uint8Array) {
     console.log(`[HardwareBridge] Received complete framed packet: ${data.length} bytes.`);
-    this.onDataReceived(data);
+    await this.onDataReceived(data);
   }
 
   /**
