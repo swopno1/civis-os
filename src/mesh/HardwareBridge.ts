@@ -50,7 +50,8 @@ export class HardwareBridge {
     try {
       while (this.port.readable) {
         this.reader = this.port.readable.getReader();
-        let buffer = new Uint8Array(0);
+        let buffer = new Uint8Array(1024 * 64); // 64KB initial buffer
+        let offset = 0;
         try {
           while (true) {
             const { value, done } = await this.reader.read();
@@ -60,23 +61,32 @@ export class HardwareBridge {
             }
             if (value) {
               // Accumulate data in buffer
-              const newBuffer = new Uint8Array(buffer.length + value.length);
-              newBuffer.set(buffer);
-              newBuffer.set(value, buffer.length);
-              buffer = newBuffer;
+              if (offset + value.length > buffer.length) {
+                const newBuffer = new Uint8Array(Math.max(buffer.length * 2, offset + value.length));
+                newBuffer.set(buffer.subarray(0, offset));
+                buffer = newBuffer;
+              }
+              buffer.set(value, offset);
+              offset += value.length;
 
               // Process all complete frames in the buffer
               // Frame format: [Length LSB] [Length MSB] [Data...]
-              while (buffer.length >= 2) {
-                const length = buffer[0] | (buffer[1] << 8);
-                if (buffer.length >= 2 + length) {
-                  const packet = buffer.slice(2, 2 + length);
+              let currentPos = 0;
+              while (offset - currentPos >= 2) {
+                const length = buffer[currentPos] | (buffer[currentPos + 1] << 8);
+                if (offset - currentPos >= 2 + length) {
+                  const packet = buffer.slice(currentPos + 2, currentPos + 2 + length);
                   await this.handleIncomingData(packet);
-                  buffer = buffer.slice(2 + length);
+                  currentPos += 2 + length;
                 } else {
                   // Incomplete frame, wait for more data
                   break;
                 }
+              }
+
+              if (currentPos > 0) {
+                buffer.copyWithin(0, currentPos, offset);
+                offset -= currentPos;
               }
             }
           }
