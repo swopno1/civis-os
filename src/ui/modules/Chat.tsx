@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import nacl from 'tweetnacl';
 import { CryptoVault } from '../../core/Crypto';
 import type { EncryptedPackage } from '../../core/Crypto';
-import type { ICivisModuleContext } from '../../core/ICivisModule';
+import type { ICivisModuleContext, ICivisStorageInstance, IMeshClient } from '../../core/ICivisModule';
 import { Hex } from '../../core/Hex';
 import './Chat.css';
 
@@ -30,8 +30,8 @@ export function Chat({ context }: ChatProps) {
   const [recipientKey, setRecipientKey] = useState('');
   const [inputText, setInputText] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
-  const [storage, setStorage] = useState<any>(null);
-  const [meshClient, setMeshClient] = useState<any>(null);
+  const [storage, setStorage] = useState<ICivisStorageInstance | null>(null);
+  const [meshClient, setMeshClient] = useState<IMeshClient | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +50,7 @@ export function Chat({ context }: ChatProps) {
         setMeshClient(client);
 
         // Load or generate chat keypair
-        const storedKeys = await storageInstance.get('civisos_chat_keys');
+        const storedKeys = await storageInstance.get<{publicKey: string, secretKey: string}>('civisos_chat_keys');
         let kp: nacl.BoxKeyPair;
         if (storedKeys) {
           kp = {
