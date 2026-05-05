@@ -21,7 +21,13 @@ export class MeshService {
       (packet) => {
         // Only deliver packets for the local node to the handlers
         console.log(`[MeshService] Delivering packet from ${packet.sender} to handlers`);
-        this.handlers.forEach(handler => handler(packet.payload));
+        this.handlers.forEach(handler => {
+          try {
+            handler(packet.payload);
+          } catch (e) {
+            console.error('[MeshService] Error in mesh packet handler:', e);
+          }
+        });
       },
       (forwardData) => {
         // Forward packets as instructed by the router

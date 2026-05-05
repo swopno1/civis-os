@@ -157,12 +157,16 @@ export class HelloWorldModule implements ICivisModule {
       try {
         const mesh = this.context.getMeshClient();
         this.meshCleanup = mesh.listen((data: any) => {
-          const log = this.container?.querySelector('#mesh-status-log');
-          if (log) {
-            const entry = document.createElement('div');
-            const message = typeof data === 'string' ? data : new TextDecoder().decode(data);
-            entry.textContent = `[${new Date().toLocaleTimeString()}] RECV: ${message}`;
-            log.appendChild(entry);
+          try {
+            const log = this.container?.querySelector('#mesh-status-log');
+            if (log) {
+              const entry = document.createElement('div');
+              const message = typeof data === 'string' ? data : new TextDecoder().decode(data);
+              entry.textContent = `[${new Date().toLocaleTimeString()}] RECV: ${message}`;
+              log.appendChild(entry);
+            }
+          } catch (err) {
+            console.error('Error in HelloWorld mesh listener:', err);
           }
         });
       } catch (e) {
