@@ -156,7 +156,7 @@ export class HelloWorldModule implements ICivisModule {
     if (this.context) {
       try {
         const mesh = this.context.getMeshClient();
-        this.meshCleanup = mesh.listen((data: any) => {
+        this.meshCleanup = mesh.listen((data) => {
           const log = this.container?.querySelector('#mesh-status-log');
           if (log) {
             const entry = document.createElement('div');
