@@ -1,4 +1,4 @@
-import type { ICivisModule, ICivisModuleContext, CivisPermission } from './ICivisModule';
+import type { ICivisModule, ICivisModuleContext, CivisPermission, ICivisStorageInstance } from './ICivisModule';
 import { CivisStorage } from './Storage';
 import { meshService } from './MeshService';
 import { translationService } from './TranslationService.ts';
@@ -70,7 +70,7 @@ export class ModuleManager {
         console.warn(`No permission handler set. Denying ${permission} for ${moduleId}`);
         return false;
       },
-      getStorageInstance: async (namespace: string): Promise<any> => {
+      getStorageInstance: async (namespace: string): Promise<ICivisStorageInstance> => {
         const perms = this.grantedPermissions.get(moduleId);
         const hasRead = perms?.has('storage:read');
         const hasWrite = perms?.has('storage:write');
@@ -83,11 +83,11 @@ export class ModuleManager {
 
         return {
           dbName: namespace,
-          get: async (key: string) => {
+          get: async <T = unknown>(key: string): Promise<T | null> => {
             if (!hasRead) throw new Error(`Permission storage:read denied for module ${moduleId}`);
-            return await CivisStorage.get(getFullKey(key));
+            return await CivisStorage.get<T>(getFullKey(key));
           },
-          put: async (key: string, val: any) => {
+          put: async <T = unknown>(key: string, val: T): Promise<void> => {
             if (!hasWrite) throw new Error(`Permission storage:write denied for module ${moduleId}`);
 
             const fullKey = getFullKey(key);
@@ -142,7 +142,7 @@ export class ModuleManager {
           throw new Error(`Module ${moduleId} does not have mesh permissions.`);
         }
         return {
-          send: async (data: any, destination?: string) => {
+          send: async (data: Uint8Array | string, destination?: string) => {
             if (!hasWrite) throw new Error(`Permission mesh:write denied for module ${moduleId}`);
             const payload = typeof data === 'string' ? new TextEncoder().encode(data) : data;
             if (destination) {
@@ -152,7 +152,7 @@ export class ModuleManager {
             }
             console.log(`[${moduleId}] Mesh packet sent`);
           },
-          listen: (callback: (data: any) => void) => {
+          listen: (callback: (data: Uint8Array) => void) => {
             if (!hasRead) throw new Error(`Permission mesh:read denied for module ${moduleId}`);
             meshService.registerHandler(callback);
             console.log(`[${moduleId}] Mesh listener registered`);

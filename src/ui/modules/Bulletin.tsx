@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import type { ICivisModuleContext } from '../../core/ICivisModule';
+import type { ICivisModuleContext, ICivisStorageInstance, IMeshClient } from '../../core/ICivisModule';
 import './Bulletin.css';
 
 interface BulletinPost {
@@ -19,8 +19,8 @@ export function Bulletin({ context }: BulletinProps) {
   const [posts, setPosts] = useState<BulletinPost[]>([]);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'Community' as BulletinPost['category'] });
   const [isInitialized, setIsInitialized] = useState(false);
-  const [storage, setStorage] = useState<any>(null);
-  const [meshClient, setMeshClient] = useState<any>(null);
+  const [storage, setStorage] = useState<ICivisStorageInstance | null>(null);
+  const [meshClient, setMeshClient] = useState<IMeshClient | null>(null);
   const [seenPostIds, setSeenPostIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {

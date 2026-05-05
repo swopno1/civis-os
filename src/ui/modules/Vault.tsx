@@ -3,7 +3,7 @@ import nacl from 'tweetnacl';
 import { CryptoVault } from '../../core/Crypto';
 import { Compression } from '../../core/Compression';
 import type { EncryptedPackage } from '../../core/Crypto';
-import type { ICivisModuleContext } from '../../core/ICivisModule';
+import type { ICivisModuleContext, ICivisStorageInstance } from '../../core/ICivisModule';
 import './Vault.css';
 
 interface VaultFile {
@@ -21,7 +21,7 @@ export function Vault({ context }: VaultProps) {
   const [files, setFiles] = useState<VaultFile[]>([]);
   const [vaultKeyPair, setVaultKeyPair] = useState<nacl.BoxKeyPair | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [storage, setStorage] = useState<any>(null);
+  const [storage, setStorage] = useState<ICivisStorageInstance | null>(null);
   const [previewContent, setPreviewContent] = useState<{ name: string, data: string | null } | null>(null);
 
   // Initialize storage and load keys/files
@@ -40,7 +40,7 @@ export function Vault({ context }: VaultProps) {
         setStorage(storageInstance);
 
         // Load or generate vault keypair
-        const storedKeys = await storageInstance.get('civisos_vault_keys');
+        const storedKeys = await storageInstance.get<{publicKey: string, secretKey: string}>('civisos_vault_keys');
         let keyPair: nacl.BoxKeyPair;
         if (storedKeys) {
           keyPair = {
@@ -57,7 +57,7 @@ export function Vault({ context }: VaultProps) {
         setVaultKeyPair(keyPair);
 
         // Load files
-        const storedFiles = await storageInstance.get('civisos_vault_files') as any[];
+        const storedFiles = await storageInstance.get<any[]>('civisos_vault_files');
         if (storedFiles) {
           const hydratedFiles = storedFiles.map((f: any) => ({
             ...f,

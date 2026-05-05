@@ -18,10 +18,17 @@ export interface IMeshClient {
   listen: (callback: (data: Uint8Array) => void) => () => void;
 }
 
+export interface ICivisStorageInstance {
+  dbName: string;
+  get: <T = unknown>(key: string) => Promise<T | null>;
+  put: <T = unknown>(key: string, val: T) => Promise<void>;
+  delete: (key: string) => Promise<void>;
+}
+
 export interface ICivisModuleContext {
   // Methods provided to the module by the OS upon initialization
   requestPermission: (permission: CivisPermission) => Promise<boolean>;
-  getStorageInstance: (namespace: string) => Promise<any>; // E.g., PouchDB instance
+  getStorageInstance: (namespace: string) => Promise<ICivisStorageInstance>;
   getMeshClient: () => IMeshClient;
 
   // Hardware Bridging
