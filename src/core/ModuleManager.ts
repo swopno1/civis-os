@@ -14,9 +14,7 @@ export class ModuleManager {
   private moduleStorageUsage: Map<string, number> = new Map();
   private readonly DEFAULT_QUOTA = 10 * 1024 * 1024; // 10MB per module
 
-  constructor() {
-    console.log('ModuleManager initialized');
-  }
+  constructor() {}
 
   public setPermissionHandler(handler: PermissionHandler): void {
     this.permissionHandler = handler;
