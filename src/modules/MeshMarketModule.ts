@@ -47,50 +47,86 @@ export class MeshMarketModule implements ICivisModule {
 
     const t = (key: string) => translationService.t(key);
 
-    const available = distributionService.getAvailableModules();
-    const modulesHtml = Array.from(available.entries()).map(([id, info]) => `
-      <div style="border: 1px solid #00ff00; padding: 10px; margin-bottom: 10px; background: #111;">
-        <h4 style="margin: 0; color: #00ff00;">${id}</h4>
-        <p style="margin: 5px 0; font-size: 0.8rem;">Version: ${info.version} | Author: ${info.author}</p>
-        <p style="margin: 5px 0; font-size: 0.8rem; color: #888;">Available from: ${info.from}</p>
-        <button onclick="window.requestModule('${id}')" style="background: #00ff00; color: #000; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; text-transform: uppercase;">${t('market.request')}</button>
-      </div>
-    `).join('') || `<p style="color: #888; text-align: center;">${t('market.scanning')}</p>`;
+    this.container.innerHTML = '';
 
-    this.container.innerHTML = `
-      <div style="padding: 20px; color: #fff; background: #000; font-family: monospace; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
-        <header style="border-bottom: 2px solid #00ff00; margin-bottom: 15px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-          <h2 style="margin: 0; color: #00ff00;">${t('market.title')}</h2>
-          <button id="announce-btn" style="background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 5px 10px; cursor: pointer; text-transform: uppercase; font-weight: bold;">${t('market.announce')}</button>
-        </header>
-        <div style="flex: 1; overflow-y: auto;">
-          ${modulesHtml}
-        </div>
-        <footer style="margin-top: 15px; font-size: 0.7rem; color: #ff8c00; border-top: 1px solid #333; padding-top: 10px;">
-          ${t('market.caution')}
-        </footer>
-      </div>
-    `;
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'padding: 20px; color: #fff; background: #000; font-family: monospace; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;';
 
-    // @ts-ignore - expose for the inline onclick for simplicity in this demo module
-    window.requestModule = (id: string) => {
-      distributionService.requestModule(id);
-      alert(`Request sent for ${id} over mesh.`);
-    };
+    const header = document.createElement('header');
+    header.style.cssText = 'border-bottom: 2px solid #00ff00; margin-bottom: 15px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;';
 
-    this.container.querySelector('#announce-btn')?.addEventListener('click', () => {
+    const title = document.createElement('h2');
+    title.style.cssText = 'margin: 0; color: #00ff00;';
+    title.textContent = t('market.title');
+    header.appendChild(title);
+
+    const announceBtn = document.createElement('button');
+    announceBtn.id = 'announce-btn';
+    announceBtn.style.cssText = 'background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 5px 10px; cursor: pointer; text-transform: uppercase; font-weight: bold;';
+    announceBtn.textContent = t('market.announce');
+    announceBtn.onclick = () => {
       moduleManager.getModules().forEach(m => {
         distributionService.announceModule(m.id, m.version, m.author);
       });
       alert('Your modules have been announced to the mesh.');
-    });
+    };
+    header.appendChild(announceBtn);
+    wrapper.appendChild(header);
+
+    const listContainer = document.createElement('div');
+    listContainer.style.cssText = 'flex: 1; overflow-y: auto;';
+
+    const available = distributionService.getAvailableModules();
+    if (available.size === 0) {
+      const scanningMsg = document.createElement('p');
+      scanningMsg.style.cssText = 'color: #888; text-align: center;';
+      scanningMsg.textContent = t('market.scanning');
+      listContainer.appendChild(scanningMsg);
+    } else {
+      Array.from(available.entries()).forEach(([id, info]) => {
+        const moduleItem = document.createElement('div');
+        moduleItem.style.cssText = 'border: 1px solid #00ff00; padding: 10px; margin-bottom: 10px; background: #111;';
+
+        const moduleId = document.createElement('h4');
+        moduleId.style.cssText = 'margin: 0; color: #00ff00;';
+        moduleId.textContent = id;
+        moduleItem.appendChild(moduleId);
+
+        const moduleMeta = document.createElement('p');
+        moduleMeta.style.cssText = 'margin: 5px 0; font-size: 0.8rem;';
+        moduleMeta.textContent = `Version: ${info.version} | Author: ${info.author}`;
+        moduleItem.appendChild(moduleMeta);
+
+        const moduleFrom = document.createElement('p');
+        moduleFrom.style.cssText = 'margin: 5px 0; font-size: 0.8rem; color: #888;';
+        moduleFrom.textContent = `Available from: ${info.from}`;
+        moduleItem.appendChild(moduleFrom);
+
+        const requestBtn = document.createElement('button');
+        requestBtn.style.cssText = 'background: #00ff00; color: #000; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; text-transform: uppercase;';
+        requestBtn.textContent = t('market.request');
+        requestBtn.onclick = () => {
+          distributionService.requestModule(id);
+          alert(`Request sent for ${id} over mesh.`);
+        };
+        moduleItem.appendChild(requestBtn);
+
+        listContainer.appendChild(moduleItem);
+      });
+    }
+    wrapper.appendChild(listContainer);
+
+    const footer = document.createElement('footer');
+    footer.style.cssText = 'margin-top: 15px; font-size: 0.7rem; color: #ff8c00; border-top: 1px solid #333; padding-top: 10px;';
+    footer.textContent = t('market.caution');
+    wrapper.appendChild(footer);
+
+    this.container.appendChild(wrapper);
   }
 
   public unmount(): void {
     if (this.cleanup) this.cleanup();
     if (this.container) this.container.innerHTML = '';
-    // @ts-ignore
-    delete window.requestModule;
   }
 
   public async suspend(): Promise<void> {}
