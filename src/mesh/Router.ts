@@ -1,5 +1,6 @@
 import { type CivisPacket, PacketType, PacketSerializer } from './Packet.ts';
 import { RNSIdentityManager } from './Identity.ts';
+import { Hex } from '../core/Hex.ts';
 
 export type OnPacketReceived = (packet: CivisPacket) => void;
 export type OnPacketForward = (data: Uint8Array) => void;
@@ -94,11 +95,7 @@ export class MeshRouter {
   }
 
   private bytesToCompactId(bytes: Uint8Array): string {
-    let res = '';
-    for (let i = 0; i < bytes.length; i++) {
-      res += bytes[i].toString(16).padStart(2, '0');
-    }
-    return res;
+    return Hex.encode(bytes);
   }
 
   public async createPacket(destination: string, payload: Uint8Array, type: PacketType = PacketType.DATA): Promise<Uint8Array> {
