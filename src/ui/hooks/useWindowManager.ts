@@ -14,6 +14,8 @@ export interface WindowState {
   isModule?: boolean;
 }
 
+export type SavedWindowState = Omit<WindowState, 'content'>;
+
 export function useWindowManager() {
   const [windows, setWindows] = useState<WindowState[]>([]);
 

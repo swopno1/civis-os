@@ -4,17 +4,11 @@ import type { IRNSIdentity } from '../mesh/Identity';
 import { CivisStorage } from '../core/Storage';
 import './desktop.css';
 import { WindowManager } from './components/WindowManager';
-import { useWindowManager } from './hooks/useWindowManager';
+import { useWindowManager, type SavedWindowState } from './hooks/useWindowManager';
 import { moduleManager } from '../core/ModuleManager';
 import type { IPermissionRequest } from '../core/PermissionService';
 import { permissionService } from '../core/PermissionService';
 import { useTranslation } from '../core/TranslationService.ts';
-import { HelloWorldModule } from '../modules/HelloWorldModule';
-import { VaultModule } from '../modules/VaultModule';
-import { ChatModule } from '../modules/ChatModule';
-import { BulletinModule } from '../modules/BulletinModule';
-import { SenseModule } from '../modules/SenseModule';
-import { MeshMarketModule } from '../modules/MeshMarketModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
 import { meshService } from '../core/MeshService';
@@ -58,7 +52,7 @@ export function Desktop() {
 
   // Load window state from storage
   useEffect(() => {
-    CivisStorage.get<any[]>('desktop_windows').then(savedWindows => {
+    CivisStorage.get<SavedWindowState[]>('desktop_windows').then(savedWindows => {
       if (savedWindows) {
         // We restore metadata. Content will be empty or generic until re-opened.
         // For actual modules, they might need re-initialization.
@@ -100,26 +94,22 @@ export function Desktop() {
       setMeshStatus(status);
     });
 
-    RNSIdentityManager.loadOrGenerateIdentity().then(identity => {
-      setRnsIdentity(identity);
+    RNSIdentityManager.loadOrGenerateIdentity().then(id => {
+      setRnsIdentity(id);
     });
 
-    const initModules = async () => {
-      try {
-        await moduleManager.registerModule(new HelloWorldModule());
-        await moduleManager.registerModule(new VaultModule());
-        await moduleManager.registerModule(new ChatModule());
-        await moduleManager.registerModule(new BulletinModule());
-        await moduleManager.registerModule(new SenseModule());
-        await moduleManager.registerModule(new MeshMarketModule());
-      } catch (e) {
-        console.warn('Module registration error:', e);
-      }
-    };
-    initModules();
+    // Battery & Offline capabilities
+    interface BatteryManager {
+      level: number;
+      addEventListener(type: 'levelchange', listener: (this: BatteryManager, ev: Event) => any): void;
+    }
+
+    interface NavigatorWithBattery extends Navigator {
+      getBattery(): Promise<BatteryManager>;
+    }
 
     if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+      (navigator as NavigatorWithBattery).getBattery().then((battery) => {
         setBatteryLevel(Math.round(battery.level * 100));
         battery.addEventListener('levelchange', () => {
           setBatteryLevel(Math.round(battery.level * 100));
