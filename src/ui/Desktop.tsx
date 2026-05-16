@@ -18,6 +18,19 @@ import { MeshMarketModule } from '../modules/MeshMarketModule';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
 import { meshService } from '../core/MeshService';
+interface BatteryManager extends EventTarget {
+  level: number;
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+}
+
+declare global {
+  interface Navigator {
+    getBattery(): Promise<BatteryManager>;
+  }
+}
+
 
 export function Desktop() {
   const {
@@ -119,7 +132,7 @@ export function Desktop() {
     initModules();
 
     if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+      navigator.getBattery().then((battery: BatteryManager) => {
         setBatteryLevel(Math.round(battery.level * 100));
         battery.addEventListener('levelchange', () => {
           setBatteryLevel(Math.round(battery.level * 100));
