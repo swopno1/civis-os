@@ -37,7 +37,7 @@ export function Bulletin({ context }: BulletinProps) {
         const client = context.getMeshClient();
         setMeshClient(client);
 
-        const history = await storageInstance.get('civisos_bulletin_posts') || [];
+        const history = await storageInstance.get<BulletinPost[]>('civisos_bulletin_posts') || [];
         setPosts(history);
         setSeenPostIds(new Set(history.map((p: BulletinPost) => p.id)));
 

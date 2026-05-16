@@ -1,4 +1,4 @@
-import { test, describe, before } from 'node:test';
+import { test, describe } from 'node:test';
 import assert from 'node:assert';
 
 // Mock TextDecoder as it might not be available in Node test environment if not polyfilled

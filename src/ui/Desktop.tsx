@@ -12,6 +12,19 @@ import { useTranslation } from '../core/TranslationService.ts';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
 import { meshService } from '../core/MeshService';
+interface BatteryManager extends EventTarget {
+  level: number;
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+}
+
+declare global {
+  interface Navigator {
+    getBattery(): Promise<BatteryManager>;
+  }
+}
+
 
 export function Desktop() {
   const {
