@@ -67,7 +67,7 @@ export function Chat({ context }: ChatProps) {
         setKeyPair(kp);
 
         // Load message history
-        const history = await storageInstance.get('civisos_chat_history') || [];
+        const history = await storageInstance.get<ChatMessage[]>('civisos_chat_history') || [];
         setMessages(history);
 
         setIsInitialized(true);

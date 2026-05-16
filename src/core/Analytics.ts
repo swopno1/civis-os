@@ -5,7 +5,6 @@
 export class AnalyticsService {
   private static instance: AnalyticsService;
   private initialized: boolean = false;
-  private endpoint: string = ''; // E.g., 'https://civisos.goatcounter.com/count'
 
   private constructor() {}
 
@@ -23,8 +22,6 @@ export class AnalyticsService {
    */
   public init(endpoint: string = 'civisos'): void {
     if (this.initialized || !endpoint) return;
-
-    this.endpoint = endpoint;
 
     // Implementation for GoatCounter (Privacy-first, no cookies, no tracking)
     // This script is only 3.5kb and respects DNT (Do Not Track).

@@ -4,9 +4,6 @@ import assert from 'node:assert';
 // Mock CompressionStream and DecompressionStream for Node.js environment if not available
 // Node.js 18+ has them, but we might need a more robust mock for the test environment.
 if (typeof globalThis.CompressionStream === 'undefined') {
-    const { TextEncoder, TextDecoder } = require('util');
-    const zlib = require('zlib');
-
     (globalThis as any).CompressionStream = class {
         constructor(format: string) {
             if (format !== 'gzip') throw new Error('Only gzip supported in mock');

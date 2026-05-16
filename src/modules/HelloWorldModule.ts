@@ -91,7 +91,7 @@ export class HelloWorldModule implements ICivisModule {
           if (status) status.textContent = 'Writing to storage...';
 
           const storage = await this.context.getStorageInstance('hello-world-db');
-          const currentCount = await storage.get('click_count') || 0;
+          const currentCount = await storage.get<number>('click_count') || 0;
           const nextCount = currentCount + 1;
           await storage.put('click_count', nextCount);
 
