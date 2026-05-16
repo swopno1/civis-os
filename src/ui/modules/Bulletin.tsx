@@ -87,24 +87,29 @@ export function Bulletin({ context }: BulletinProps) {
             const peerIds = envelope.ids as string[];
             const missingIds = peerIds.filter(id => !seenPostIds.has(id));
 
-            for (const id of missingIds) {
-              // Request missing post
+            if (missingIds.length > 0) {
+              // Request missing posts in batch
               const request = {
                 module: 'bulletin',
                 type: 'request',
-                id
+                ids: missingIds
               };
               await meshClient.send(JSON.stringify(request));
             }
           } else if (envelope.type === 'request') {
-            // Peer requested a post
-            const requestedPost = posts.find(p => p.id === envelope.id);
-            if (requestedPost) {
-              const response = {
-                module: 'bulletin',
-                post: requestedPost
-              };
-              await meshClient.send(JSON.stringify(response));
+            // Peer requested post(s)
+            const requestedIds = (envelope.ids as string[]) || [envelope.id as string];
+
+            for (const id of requestedIds) {
+              if (!id) continue;
+              const requestedPost = posts.find(p => p.id === id);
+              if (requestedPost) {
+                const response = {
+                  module: 'bulletin',
+                  post: requestedPost
+                };
+                await meshClient.send(JSON.stringify(response));
+              }
             }
           } else if (envelope.post) {
             const post: BulletinPost = envelope.post;
