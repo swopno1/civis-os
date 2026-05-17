@@ -8,6 +8,8 @@ import { useWindowManager, type SavedWindowState } from './hooks/useWindowManage
 import { moduleManager } from '../core/ModuleManager';
 import type { IPermissionRequest } from '../core/PermissionService';
 import { permissionService } from '../core/PermissionService';
+import { CORE_MODULES } from "../modules/index.ts";
+import type { ICivisModule } from "../core/ICivisModule.ts";
 import { useTranslation } from '../core/TranslationService.ts';
 import { Button } from './components/Button';
 import { Modal } from './components/Modal';
@@ -155,18 +157,33 @@ export function Desktop() {
     }
   }, []);
 
-  const handleModuleMount = (id: string, el: HTMLDivElement | null) => {
+  const ensureModuleRegistered = async (id: string) => {
+    const isRegistered = moduleManager.getModules().some(m => m.id === id);
+    if (!isRegistered) {
+      const ModuleClass = CORE_MODULES[id];
+      if (ModuleClass) {
+        const instance = new ModuleClass();
+        await moduleManager.registerModule(instance);
+      }
+    }
+  };
+
+  const handleModuleMount = async (id: string, el: HTMLDivElement | null) => {
     if (el) {
       if (moduleContainers.current.get(id) !== el) {
         moduleContainers.current.set(id, el);
-        moduleManager.mountModule(id, el);
+        await ensureModuleRegistered(id);
+        if (moduleContainers.current.get(id) === el) {
+          moduleManager.mountModule(id, el);
+        }
       }
     } else {
       moduleContainers.current.delete(id);
     }
   };
 
-  const openModuleWindow = (id: string, title: string) => {
+  const openModuleWindow = async (id: string, title: string) => {
+    await ensureModuleRegistered(id);
     openWindow(
       id,
       title,
