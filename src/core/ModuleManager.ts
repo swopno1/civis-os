@@ -40,7 +40,6 @@ export class ModuleManager {
     this.contexts.set(module.id, context);
 
     await module.init(context);
-    console.log(`Module ${module.id} registered and initialized.`);
   }
 
   private createModuleContext(moduleId: string): ICivisModuleContext {
